@@ -14,7 +14,7 @@ export function Sidebar({ navMain, navManagement, user }: SidebarProps) {
     <aside className={styles.sidebar}>
       <div className={styles.logo}>
         <h1>
-          Trans<span>tea</span>
+          Transi<span>tea</span>
         </h1>
         <p>Suivi de colis · RDC</p>
         <Pill tone="gold" size="sm">
