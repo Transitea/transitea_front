@@ -1,0 +1,28 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.delivered { background: var(--success-bg); color: var(--success); }
+.delivered::before { background: var(--success); }
+
+.transit { background: var(--primary-bg); color: var(--primary); }
+.transit::before { background: var(--primary); }
+
+.pending { background: var(--gold-light); color: #92400e; }
+.pending::before { background: var(--gold); }
+
+.issue { background: var(--danger-bg); color: var(--danger); }
+.issue::before { background: var(--danger); }

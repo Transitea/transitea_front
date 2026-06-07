@@ -1,0 +1,21 @@
+.topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.title { font-size: 18px; font-weight: 700; }
+.sub { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
+
+.right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

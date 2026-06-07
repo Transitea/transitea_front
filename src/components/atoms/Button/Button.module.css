@@ -1,0 +1,30 @@
+.btn {
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.primary {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.primary:hover { background: var(--primary-light); }
+
+.ghost {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 5px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.ghost:hover { border-color: var(--text-muted); }
