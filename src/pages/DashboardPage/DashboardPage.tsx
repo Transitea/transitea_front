@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/auth/AuthContext'
 import { Sidebar } from '@/components/organisms/Sidebar'
 import { Topbar } from '@/components/organisms/Topbar'
 import { StatsGrid } from '@/components/organisms/StatsGrid'
@@ -16,9 +18,22 @@ import {
 import styles from './DashboardPage.module.css'
 
 export function DashboardPage() {
+  const { logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
   return (
     <>
-      <Sidebar navMain={navMain} navManagement={navManagement} user={currentUser} />
+      <Sidebar
+        navMain={navMain}
+        navManagement={navManagement}
+        user={currentUser}
+        onLogout={handleLogout}
+      />
 
       <div className={styles.main}>
         <Topbar title="Tableau de bord" subtitle="Samedi 10 mai 2026 · Kinshasa" />

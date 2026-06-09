@@ -7,9 +7,10 @@ interface SidebarProps {
   navMain: NavItemProps[]
   navManagement: NavItemProps[]
   user: UserCardProps
+  onLogout?: () => void
 }
 
-export function Sidebar({ navMain, navManagement, user }: SidebarProps) {
+export function Sidebar({ navMain, navManagement, user, onLogout }: SidebarProps) {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logo}>
@@ -38,6 +39,9 @@ export function Sidebar({ navMain, navManagement, user }: SidebarProps) {
 
       <div className={styles.bottom}>
         <UserCard {...user} />
+        <button type="button" className={styles.logout} onClick={onLogout}>
+          <i className="bi bi-box-arrow-right" /> Déconnexion
+        </button>
       </div>
     </aside>
   )
