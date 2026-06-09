@@ -1,16 +1,22 @@
 import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/atoms/Button'
 import { FormField } from '@/components/molecules/FormField'
+import { useAuth } from '@/auth/AuthContext'
 import styles from './LoginPage.module.css'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    // TODO: brancher l'authentification (API) plus tard
-    console.log('Connexion', { email, password })
+    // TODO: brancher l'authentification (API) plus tard.
+    // Pour l'instant on simule une connexion réussie.
+    login('demo-token')
+    navigate('/')
   }
 
   return (
