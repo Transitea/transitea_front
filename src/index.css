@@ -30,3 +30,7 @@ body {
 
 /* Zone de contenu commune à toutes les pages applicatives */
 .app-content { padding: 24px 28px; flex: 1; }
+
+@media (max-width: 900px) {
+  .app-content { padding: 16px; }
+}

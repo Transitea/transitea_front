@@ -21,6 +21,7 @@ export function RecentPackagesTable({ packages, subtitle, onSeeAll }: RecentPack
         </Button>
       }
     >
+      <div className={styles.tableScroll}>
       <table className={styles.table}>
         <thead>
           <tr>
@@ -52,6 +53,7 @@ export function RecentPackagesTable({ packages, subtitle, onSeeAll }: RecentPack
           ))}
         </tbody>
       </table>
+      </div>
     </Card>
   )
 }

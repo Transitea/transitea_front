@@ -4,6 +4,13 @@
   gap: 16px;
 }
 
+/* Colonne latérale passe sous la table sur tablette/mobile */
+@media (max-width: 1000px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
 .sideCol {
   display: flex;
   flex-direction: column;
