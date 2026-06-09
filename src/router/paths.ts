@@ -2,6 +2,7 @@
 export const paths = {
   login: '/login',
   dashboard: '/',
+  scan: '/scan',
   colis: '/colis',
   colisNouveau: '/colis/nouveau',
   colisDetail: (id = ':id') => `/colis/${id}`,

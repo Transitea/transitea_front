@@ -4,6 +4,7 @@ import { paths } from '@/router/paths'
 /** Éléments de navigation de la sidebar, regroupés par section. */
 export const navMain: NavItemProps[] = [
   { icon: 'bi-speedometer2', label: 'Dashboard', path: paths.dashboard, end: true },
+  { icon: 'bi-qr-code-scan', label: 'Scanner', path: paths.scan },
   { icon: 'bi-box-seam', label: 'Colis', path: paths.colis, badge: 54 },
   { icon: 'bi-map', label: 'Itinéraires', path: paths.itineraires },
   { icon: 'bi-people', label: 'Clients', path: paths.clients },

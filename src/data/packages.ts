@@ -112,6 +112,41 @@ export function getPackageById(trackingCode: string): PackageDetail | undefined 
   return allPackages.find((p) => p.trackingCode === trackingCode)
 }
 
+const pad = (n: number) => String(n).padStart(2, '0')
+
+/** Horodatage court façon "10/05 · 14h30". */
+function nowLabel(): string {
+  const d = new Date()
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} · ${pad(d.getHours())}h${pad(d.getMinutes())}`
+}
+
+/**
+ * Met à jour le statut d'un colis (mutation en mémoire — à remplacer par l'API/file de
+ * synchro hors-ligne plus tard). Ajoute une étape horodatée à l'historique.
+ */
+export function updatePackageStatus(
+  trackingCode: string,
+  status: PackageStatus,
+  comment?: string,
+): PackageDetail | undefined {
+  const pkg = allPackages.find((p) => p.trackingCode === trackingCode)
+  if (!pkg) return undefined
+
+  const date = nowLabel()
+  pkg.status = status
+  pkg.date = date
+  pkg.steps = [
+    ...pkg.steps,
+    {
+      label: STATUS_META[status].label,
+      location: comment?.trim() || '—',
+      date,
+      done: true,
+    },
+  ]
+  return pkg
+}
+
 /** Filtres de la page Colis : "Tous" + les 8 statuts du cahier des charges. */
 export const statusFilters: { value: PackageStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'Tous' },

@@ -80,6 +80,24 @@
 
 .actions { display: flex; flex-direction: column; gap: 10px; padding: 20px; }
 
+.updateBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  transition: background 0.15s;
+}
+.updateBtn:hover { background: var(--primary-light); }
+
 .actionBtn {
   display: flex;
   align-items: center;
