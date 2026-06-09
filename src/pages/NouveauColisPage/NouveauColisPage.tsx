@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/atoms/Button'
+import { STATUS_ORDER, STATUS_META } from '@/components/atoms/StatusBadge'
 import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
 import { FormField } from '@/components/molecules/FormField'
@@ -14,7 +15,7 @@ const initialState = {
   via: '',
   weight: '',
   price: '',
-  status: 'pending',
+  status: 'ENREGISTRE',
 }
 
 export function NouveauColisPage() {
@@ -105,10 +106,11 @@ export function NouveauColisPage() {
                   value={form.status}
                   onChange={(e) => update('status', e.target.value)}
                 >
-                  <option value="pending">En attente</option>
-                  <option value="transit">En transit</option>
-                  <option value="delivered">Livré</option>
-                  <option value="issue">Problème</option>
+                  {STATUS_ORDER.map((s) => (
+                    <option key={s} value={s}>
+                      {STATUS_META[s].label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

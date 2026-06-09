@@ -6,6 +6,7 @@
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .badge::before {
@@ -13,16 +14,15 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
+  background: currentColor;
 }
 
-.delivered { background: var(--success-bg); color: var(--success); }
-.delivered::before { background: var(--success); }
-
-.transit { background: var(--primary-bg); color: var(--primary); }
-.transit::before { background: var(--primary); }
-
-.pending { background: var(--gold-light); color: #92400e; }
-.pending::before { background: var(--gold); }
-
-.issue { background: var(--danger-bg); color: var(--danger); }
-.issue::before { background: var(--danger); }
+/* Les 8 statuts du cahier des charges, couleurs distinctes */
+.enregistre { background: #f1f5f9; color: #475569; }
+.prisEnCharge { background: var(--primary-bg); color: var(--primary); }
+.enTransit { background: #e0f2fe; color: #0369a1; }
+.arriveDepot { background: #ede9fe; color: #6d28d9; }
+.enLivraison { background: var(--gold-light); color: #b45309; }
+.livre { background: var(--success-bg); color: var(--success); }
+.refuse { background: var(--danger-bg); color: var(--danger); }
+.retour { background: #ffe4e6; color: #be123c; }
