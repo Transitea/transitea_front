@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/router/ProtectedRoute'
 import { paths } from '@/router/paths'
 import { LoginPage } from '@/pages/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
+import { ScanPage } from '@/pages/ScanPage'
 import { ColisPage } from '@/pages/ColisPage'
 import { ColisDetailPage } from '@/pages/ColisDetailPage'
 import { NouveauColisPage } from '@/pages/NouveauColisPage'
@@ -24,6 +25,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path={paths.dashboard} element={<DashboardPage />} />
+          <Route path={paths.scan} element={<ScanPage />} />
           <Route path={paths.colis} element={<ColisPage />} />
           <Route path={paths.colisNouveau} element={<NouveauColisPage />} />
           <Route path={paths.colisDetail()} element={<ColisDetailPage />} />

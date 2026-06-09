@@ -1,15 +1,24 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { StatusBadge } from '@/components/atoms/StatusBadge'
+import { StatusBadge, type PackageStatus } from '@/components/atoms/StatusBadge'
 import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
-import { getPackageById } from '@/data/packages'
+import { UpdateStatusSheet } from '@/components/organisms/UpdateStatusSheet'
+import { getPackageById, updatePackageStatus } from '@/data/packages'
 import { paths } from '@/router/paths'
 import styles from './ColisDetailPage.module.css'
 
 export function ColisDetailPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
-  const pkg = getPackageById(id)
+  const [pkg, setPkg] = useState(() => getPackageById(id))
+  const [sheetOpen, setSheetOpen] = useState(false)
+
+  const handleUpdate = (status: PackageStatus, comment: string) => {
+    const updated = updatePackageStatus(id, status, comment)
+    if (updated) setPkg({ ...updated })
+    setSheetOpen(false)
+  }
 
   if (!pkg) {
     return (
@@ -99,6 +108,9 @@ export function ColisDetailPage() {
 
             <Card title="Actions">
               <div className={styles.actions}>
+                <button className={styles.updateBtn} onClick={() => setSheetOpen(true)}>
+                  <i className="bi bi-arrow-repeat" /> Mettre à jour le statut
+                </button>
                 <button className={styles.actionBtn}>
                   <i className={`bi bi-whatsapp ${styles.whatsapp}`} /> Notifier par WhatsApp
                 </button>
@@ -110,6 +122,15 @@ export function ColisDetailPage() {
           </div>
         </div>
       </div>
+
+      {sheetOpen && (
+        <UpdateStatusSheet
+          trackingCode={pkg.trackingCode}
+          current={pkg.status}
+          onConfirm={handleUpdate}
+          onClose={() => setSheetOpen(false)}
+        />
+      )}
     </>
   )
 }
