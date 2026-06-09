@@ -30,7 +30,15 @@
   color: #fff;
 }
 
+.tableScroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
 .table { width: 100%; border-collapse: collapse; }
+
+@media (max-width: 720px) {
+  /* Évite l'écrasement des colonnes : scroll horizontal au besoin */
+  .table { min-width: 600px; }
+  .table th, .table td { padding-left: 14px; padding-right: 14px; }
+}
 
 .table th {
   text-align: left;

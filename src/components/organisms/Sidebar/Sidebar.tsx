@@ -8,12 +8,31 @@ interface SidebarProps {
   navManagement: NavItemProps[]
   user: UserCardProps
   onLogout?: () => void
+  /** Tiroir ouvert (mobile). */
+  open?: boolean
+  /** Ferme le tiroir (mobile). */
+  onClose?: () => void
 }
 
-export function Sidebar({ navMain, navManagement, user, onLogout }: SidebarProps) {
+export function Sidebar({
+  navMain,
+  navManagement,
+  user,
+  onLogout,
+  open = false,
+  onClose,
+}: SidebarProps) {
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${open ? styles.open : ''}`}>
       <div className={styles.logo}>
+        <button
+          type="button"
+          className={styles.close}
+          aria-label="Fermer le menu"
+          onClick={onClose}
+        >
+          <i className="bi bi-x-lg" />
+        </button>
         <h1>
           Transi<span>tea</span>
         </h1>

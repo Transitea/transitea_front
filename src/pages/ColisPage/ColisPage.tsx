@@ -63,6 +63,7 @@ export function ColisPage() {
         </div>
 
         <Card>
+          <div className={styles.tableScroll}>
           <table className={styles.table}>
             <thead>
               <tr>
@@ -98,6 +99,7 @@ export function ColisPage() {
               ))}
             </tbody>
           </table>
+          </div>
           {filtered.length === 0 && (
             <div className={styles.empty}>Aucun colis ne correspond à votre recherche.</div>
           )}
