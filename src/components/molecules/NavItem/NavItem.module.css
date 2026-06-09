@@ -1,0 +1,32 @@
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+}
+
+.item:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+
+.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-left-color: var(--gold);
+  font-weight: 600;
+}
+
+.icon { font-size: 17px; width: 20px; text-align: center; line-height: 1; }
+
+.badge {
+  margin-left: auto;
+  background: var(--gold);
+  color: #1e293b;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 20px;
+}

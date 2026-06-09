@@ -1,0 +1,26 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  border-radius: 20px;
+}
+
+.pill::before {
+  content: '';
+  border-radius: 50%;
+}
+
+/* tones */
+.success { background: var(--success-bg); color: var(--success); }
+.success::before { background: var(--success); }
+
+.gold { background: rgba(245, 158, 11, 0.2); color: var(--gold); }
+.gold::before { background: var(--gold); }
+
+/* sizes */
+.md { font-size: 12px; padding: 5px 12px; }
+.md::before { width: 7px; height: 7px; }
+
+.sm { font-size: 10px; padding: 2px 8px; }
+.sm::before { width: 6px; height: 6px; }
