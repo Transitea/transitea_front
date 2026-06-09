@@ -1,0 +1,33 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.route { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; }
+.route i { color: var(--gold); font-size: 14px; }
+
+.stops {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.meta { display: flex; gap: 20px; }
+.metaItem { font-size: 13px; }
+.metaItem strong { display: block; font-size: 18px; color: var(--text); }
+.metaItem span { color: var(--text-muted); font-size: 12px; }

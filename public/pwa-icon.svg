@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#1E3A5F"/>
+  <g transform="translate(256 256)">
+    <!-- Colis stylisé -->
+    <path d="M0 -150 L130 -75 L130 75 L0 150 L-130 75 L-130 -75 Z" fill="#2A4F80"/>
+    <path d="M0 -150 L130 -75 L0 0 L-130 -75 Z" fill="#F97316"/>
+    <path d="M0 0 L130 -75 L130 75 L0 150 Z" fill="#24477A"/>
+    <path d="M0 0 L-130 -75 L-130 75 L0 150 Z" fill="#1E3A5F"/>
+    <line x1="0" y1="0" x2="0" y2="150" stroke="#16293f" stroke-width="4"/>
+  </g>
+</svg>

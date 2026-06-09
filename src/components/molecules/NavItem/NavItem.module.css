@@ -8,6 +8,7 @@
   cursor: pointer;
   transition: all 0.15s;
   border-left: 3px solid transparent;
+  text-decoration: none;
 }
 
 .item:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
