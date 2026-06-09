@@ -49,12 +49,12 @@ export const stats: StatCardProps[] = [
 ]
 
 export const recentPackages: Package[] = [
-  { trackingCode: 'TST-20240510-001', destination: 'Lubumbashi', via: 'via Kolwezi', client: 'Mama Béatrice', status: 'delivered', date: '10/05 · 09h14' },
-  { trackingCode: 'TST-20240510-002', destination: 'Mbuji-Mayi', via: 'direct', client: 'Papa Augustin', status: 'transit', date: '10/05 · 08h30' },
-  { trackingCode: 'TST-20240510-003', destination: 'Goma', via: 'via Butembo', client: 'Solange M.', status: 'pending', date: '10/05 · 07h55' },
-  { trackingCode: 'TST-20240510-004', destination: 'Kisangani', via: 'via Buta', client: 'Christian K.', status: 'issue', date: '09/05 · 18h42' },
-  { trackingCode: 'TST-20240510-005', destination: 'Matadi', via: 'via Kenge', client: 'Fiston B.', status: 'delivered', date: '09/05 · 16h10' },
-  { trackingCode: 'TST-20240510-006', destination: 'Kananga', via: 'direct', client: 'Grâce N.', status: 'transit', date: '09/05 · 14h27' },
+  { trackingCode: 'TRA-2024-000001', destination: 'Lubumbashi', via: 'via Kolwezi', client: 'Mama Béatrice', status: 'LIVRE', date: '10/05 · 09h14' },
+  { trackingCode: 'TRA-2024-000002', destination: 'Mbuji-Mayi', via: 'direct', client: 'Papa Augustin', status: 'EN_TRANSIT', date: '10/05 · 08h30' },
+  { trackingCode: 'TRA-2024-000003', destination: 'Goma', via: 'via Butembo', client: 'Solange M.', status: 'ENREGISTRE', date: '10/05 · 07h55' },
+  { trackingCode: 'TRA-2024-000004', destination: 'Kisangani', via: 'via Buta', client: 'Christian K.', status: 'REFUSE', date: '09/05 · 18h42' },
+  { trackingCode: 'TRA-2024-000006', destination: 'Kananga', via: 'direct', client: 'Grâce N.', status: 'EN_LIVRAISON', date: '09/05 · 14h27' },
+  { trackingCode: 'TRA-2024-000021', destination: 'Tshikapa', via: 'direct', client: 'Patrick M.', status: 'PRIS_EN_CHARGE', date: '09/05 · 09h40' },
 ]
 
 export const syncStatus: SyncStatus = {
@@ -64,8 +64,8 @@ export const syncStatus: SyncStatus = {
 }
 
 export const recentActivity: ActivityItemProps[] = [
-  { icon: 'bi-check-lg', tone: 'green', text: 'Colis TST-001 livré à Lubumbashi', meta: 'Il y a 23 min · WhatsApp envoyé' },
+  { icon: 'bi-check-lg', tone: 'green', text: 'Colis TRA-2024-000001 livré à Lubumbashi', meta: 'Il y a 23 min · WhatsApp envoyé' },
   { icon: 'bi-chat-dots', tone: 'gold', text: 'Notification WhatsApp · Papa Augustin', meta: 'Il y a 41 min · Lecture confirmée' },
-  { icon: 'bi-box-seam', tone: 'blue', text: 'Nouveau colis enregistré · TST-006', meta: 'Il y a 1h · Mode hors-ligne' },
+  { icon: 'bi-box-seam', tone: 'blue', text: 'Nouveau colis enregistré · TRA-2024-000021', meta: 'Il y a 1h · Mode hors-ligne' },
   { icon: 'bi-envelope', tone: 'gold', text: 'Récapitulatif email envoyé', meta: 'Hier 18h00 · 75 colis résumés' },
 ]
