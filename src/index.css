@@ -27,3 +27,6 @@ body {
 }
 
 #root { display: flex; width: 100%; }
+
+/* Zone de contenu commune à toutes les pages applicatives */
+.app-content { padding: 24px 28px; flex: 1; }

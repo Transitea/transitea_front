@@ -1,21 +1,42 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
+import { AppLayout } from '@/layouts/AppLayout'
+import { ProtectedRoute } from '@/router/ProtectedRoute'
+import { paths } from '@/router/paths'
 import { LoginPage } from '@/pages/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
-import { ProtectedRoute } from '@/router/ProtectedRoute'
+import { ColisPage } from '@/pages/ColisPage'
+import { ColisDetailPage } from '@/pages/ColisDetailPage'
+import { NouveauColisPage } from '@/pages/NouveauColisPage'
+import { ClientsPage } from '@/pages/ClientsPage'
+import { ItinerairesPage } from '@/pages/ItinerairesPage'
+import { NotificationsPage } from '@/pages/NotificationsPage'
+import { RapportsPage } from '@/pages/RapportsPage'
+import { ParametresPage } from '@/pages/ParametresPage'
+import { NotFoundPage } from '@/pages/NotFoundPage'
 
 function App() {
   return (
     <Routes>
       {/* Route publique */}
-      <Route path="/login" element={<LoginPage />} />
+      <Route path={paths.login} element={<LoginPage />} />
 
-      {/* Routes protégées */}
+      {/* Routes protégées dans la coquille applicative */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<DashboardPage />} />
+        <Route element={<AppLayout />}>
+          <Route path={paths.dashboard} element={<DashboardPage />} />
+          <Route path={paths.colis} element={<ColisPage />} />
+          <Route path={paths.colisNouveau} element={<NouveauColisPage />} />
+          <Route path={paths.colisDetail()} element={<ColisDetailPage />} />
+          <Route path={paths.clients} element={<ClientsPage />} />
+          <Route path={paths.itineraires} element={<ItinerairesPage />} />
+          <Route path={paths.notifications} element={<NotificationsPage />} />
+          <Route path={paths.rapports} element={<RapportsPage />} />
+          <Route path={paths.parametres} element={<ParametresPage />} />
+        </Route>
       </Route>
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* 404 */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

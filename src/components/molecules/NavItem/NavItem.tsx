@@ -1,21 +1,28 @@
+import { NavLink } from 'react-router-dom'
 import styles from './NavItem.module.css'
 
 export interface NavItemProps {
   icon: string
   label: string
-  active?: boolean
+  /** Chemin de destination (react-router). */
+  path: string
+  /** Correspondance exacte du chemin (utile pour la route racine "/"). */
+  end?: boolean
   badge?: number
-  onClick?: () => void
 }
 
-export function NavItem({ icon, label, active, badge, onClick }: NavItemProps) {
+export function NavItem({ icon, label, path, end, badge }: NavItemProps) {
   return (
-    <div className={`${styles.item} ${active ? styles.active : ''}`} onClick={onClick}>
+    <NavLink
+      to={path}
+      end={end}
+      className={({ isActive }) => `${styles.item} ${isActive ? styles.active : ''}`}
+    >
       <span className={styles.icon}>
         <i className={`bi ${icon}`} />
       </span>
       {label}
       {badge !== undefined && <span className={styles.badge}>{badge}</span>}
-    </div>
+    </NavLink>
   )
 }

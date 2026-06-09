@@ -17,7 +17,7 @@ export function Sidebar({ navMain, navManagement, user, onLogout }: SidebarProps
         <h1>
           Transi<span>tea</span>
         </h1>
-        <p>Suivi de colis · RDC</p>
+        <p>Suivi de colis</p>
         <Pill tone="gold" size="sm">
           Mode hors-ligne actif
         </Pill>

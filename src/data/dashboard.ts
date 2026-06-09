@@ -1,6 +1,5 @@
 import type { PackageStatus } from '@/components/atoms/StatusBadge'
 import type { StatCardProps } from '@/components/molecules/StatCard'
-import type { NavItemProps } from '@/components/molecules/NavItem'
 import type { ActivityItemProps } from '@/components/molecules/ActivityItem'
 
 /**
@@ -28,19 +27,6 @@ export const currentUser = {
   name: 'Jean-Marie K.',
   role: 'Transporteur',
 }
-
-export const navMain: NavItemProps[] = [
-  { icon: 'bi-speedometer2', label: 'Dashboard', active: true },
-  { icon: 'bi-box-seam', label: 'Colis', badge: 54 },
-  { icon: 'bi-map', label: 'Itinéraires' },
-  { icon: 'bi-people', label: 'Clients' },
-]
-
-export const navManagement: NavItemProps[] = [
-  { icon: 'bi-bell', label: 'Notifications', badge: 3 },
-  { icon: 'bi-bar-chart', label: 'Rapports' },
-  { icon: 'bi-gear', label: 'Paramètres' },
-]
 
 export const stats: StatCardProps[] = [
   {
