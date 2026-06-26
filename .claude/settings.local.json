@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config *)",
+      "Bash(git checkout *)",
+      "Bash(npx tsc *)",
+      "Bash(npx --no-install tsc -b)",
+      "Bash(echo \"EXIT: $?\")",
+      "PowerShell(npx tsc -b; \"EXIT: $LASTEXITCODE\")",
+      "PowerShell(Start-Process -NoNewWindow npm -ArgumentList \"run\",\"dev\"; Start-Sleep -Seconds 4; try { \\(Invoke-WebRequest http://localhost:5173 -UseBasicParsing\\).StatusCode } catch { $_.Exception.Message })",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git add *)",
+      "Bash(git commit -m ':sparkles: integrate dashboard mockup with atomic design architecture' -m '- Add atoms: Avatar, Button, Pill, StatusBadge *)",
+      "Bash(git commit *)",
+      "Bash(echo \"core.autocrlf = $\\(git config core.autocrlf\\)\")",
+      "Bash(echo \"core.eol = $\\(git config core.eol\\)\")",
+      "Bash(git rm *)",
+      "Bash(git reset *)",
+      "Bash(gh auth *)",
+      "Bash(gh pr *)",
+      "Bash(git push *)",
+      "Bash(grep -iA2 -B2 \"statut\\\\|status\\\\|état\\\\|livré\\\\|transit\\\\|attente\")",
+      "Bash(pdftotext -layout \"Cahier des Charges Technique - Transitea MVP \\(3\\).pdf\" -)",
+      "Bash(grep -iB2 -A6 \"QR\\\\|scan\\\\|parcours\\\\|workflow\\\\|livreur\\\\|terrain\\\\|mobile\\\\|use case\\\\|cas d'usage\\\\|sc�nario\")"
+    ]
+  }
+}

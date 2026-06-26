@@ -1,37 +1,62 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/atoms/Button'
 import { Input } from '@/components/atoms/Input'
 import { StatusBadge, type PackageStatus } from '@/components/atoms/StatusBadge'
 import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
-import { allPackages, statusFilters } from '@/data/packages'
+import { statusFilters } from '@/data/packages'
+import { listerColis, rechercherColis, type ColisReponse } from '@/services/colisApi'
 import { paths } from '@/router/paths'
 import styles from './ColisPage.module.css'
+
+function formatDate(iso: string): string {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} · ${pad(d.getHours())}h${pad(d.getMinutes())}`
+}
 
 export function ColisPage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<PackageStatus | 'all'>('all')
+  const [colis, setColis] = useState<ColisReponse[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    return allPackages.filter((p) => {
-      const matchStatus = filter === 'all' || p.status === filter
-      const matchSearch =
-        !q ||
-        p.trackingCode.toLowerCase().includes(q) ||
-        p.destination.toLowerCase().includes(q) ||
-        p.client.toLowerCase().includes(q)
-      return matchStatus && matchSearch
-    })
+  const fetchColis = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      let result
+      if (search.trim()) {
+        result = await rechercherColis(search.trim())
+      } else {
+        result = await listerColis({
+          statut: filter !== 'all' ? filter : undefined,
+          taille: 50,
+        })
+      }
+      setColis(result.contenu)
+      setTotal(result.totalElements)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur de chargement')
+    } finally {
+      setLoading(false)
+    }
   }, [search, filter])
+
+  useEffect(() => {
+    const timer = setTimeout(fetchColis, search ? 400 : 0)
+    return () => clearTimeout(timer)
+  }, [fetchColis, search])
 
   return (
     <>
       <Topbar
         title="Colis"
-        subtitle={`${allPackages.length} colis au total`}
+        subtitle={loading ? 'Chargement…' : `${total} colis au total`}
         actions={
           <Button variant="primary" onClick={() => navigate(paths.colisNouveau)}>
             <i className="bi bi-plus-lg" /> Nouveau colis
@@ -63,44 +88,51 @@ export function ColisPage() {
         </div>
 
         <Card>
-          <div className={styles.tableScroll}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Code suivi</th>
-                <th>Destination</th>
-                <th>Client</th>
-                <th>Statut</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((p) => (
-                <tr
-                  key={p.trackingCode}
-                  className={styles.row}
-                  onClick={() => navigate(paths.colisDetail(p.trackingCode))}
-                >
-                  <td>
-                    <span className={styles.code}>{p.trackingCode}</span>
-                  </td>
-                  <td>
-                    <div className={styles.dest}>
-                      {p.destination}
-                      <span>{p.via}</span>
-                    </div>
-                  </td>
-                  <td>{p.client}</td>
-                  <td>
-                    <StatusBadge status={p.status} />
-                  </td>
-                  <td className={styles.date}>{p.date}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-          {filtered.length === 0 && (
+          {error && (
+            <div style={{ padding: 24, textAlign: 'center', color: 'var(--red, #dc2626)' }}>
+              {error}
+            </div>
+          )}
+          {!error && (
+            <div className={styles.tableScroll}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Code suivi</th>
+                    <th>Destination</th>
+                    <th>Client</th>
+                    <th>Statut</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {colis.map((p) => (
+                    <tr
+                      key={p.id}
+                      className={styles.row}
+                      onClick={() => navigate(paths.colisDetail(String(p.id)))}
+                    >
+                      <td>
+                        <span className={styles.code}>{p.codeTracking}</span>
+                      </td>
+                      <td>
+                        <div className={styles.dest}>
+                          {p.destinataireVille ?? '—'}
+                          <span>{p.destinataireAdresse ?? ''}</span>
+                        </div>
+                      </td>
+                      <td>{p.destinataireNom}</td>
+                      <td>
+                        <StatusBadge status={p.statutActuel} />
+                      </td>
+                      <td className={styles.date}>{formatDate(p.dateCreation)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {!loading && !error && colis.length === 0 && (
             <div className={styles.empty}>Aucun colis ne correspond à votre recherche.</div>
           )}
         </Card>
