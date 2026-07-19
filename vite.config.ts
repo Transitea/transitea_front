@@ -2,11 +2,18 @@ import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import basicSsl from '@vitejs/plugin-basic-ssl'
+
+// localhost est un contexte sécurisé même en HTTP (getUserMedia y fonctionne déjà) :
+// HTTPS n'est nécessaire que pour tester le scan QR depuis un smartphone via l'IP du LAN.
+// Activé uniquement par `npm run dev:phone` (variable HTTPS=true), pour ne pas gêner le dev habituel.
+const httpsActif = process.env.HTTPS === 'true'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
+    ...(command === 'serve' && httpsActif ? [basicSsl()] : []),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'pwa-icon.svg'],
@@ -38,6 +45,7 @@ export default defineConfig({
     },
   },
   server: {
+    host: httpsActif, // n'expose sur le LAN que lorsque HTTPS est actif (dev:phone)
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
@@ -46,4 +54,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))
