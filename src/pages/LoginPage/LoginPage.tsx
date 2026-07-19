@@ -3,20 +3,30 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/atoms/Button'
 import { FormField } from '@/components/molecules/FormField'
 import { useAuth } from '@/auth/AuthContext'
+import { login as apiLogin } from '@/services/authApi'
 import styles from './LoginPage.module.css'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    // TODO: brancher l'authentification (API) plus tard.
-    // Pour l'instant on simule une connexion réussie.
-    login('demo-token')
-    navigate('/')
+    setError(null)
+    setLoading(true)
+    try {
+      const data = await apiLogin(email, password)
+      login(data.accessToken, data.refreshToken, data.utilisateur)
+      navigate('/')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Connexion échouée')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -44,7 +54,7 @@ export function LoginPage() {
               <i className="bi bi-whatsapp" /> Notifications WhatsApp
             </li>
             <li>
-              <i className="bi bi-geo-alt" /> Itinéraires sur tout le territoire
+              <i className="bi bi-geo-alt" /> Réseau d'agences France ↔ RDC
             </li>
           </ul>
         </div>
@@ -82,6 +92,8 @@ export function LoginPage() {
               required
             />
 
+            {error && <p className={styles.error}>{error}</p>}
+
             <div className={styles.row}>
               <label className={styles.remember}>
                 <input type="checkbox" /> Se souvenir de moi
@@ -91,8 +103,12 @@ export function LoginPage() {
               </a>
             </div>
 
-            <Button type="submit" variant="primary" className={styles.submit}>
-              <i className="bi bi-box-arrow-in-right" /> Se connecter
+            <Button type="submit" variant="primary" className={styles.submit} disabled={loading}>
+              {loading ? (
+                'Connexion…'
+              ) : (
+                <><i className="bi bi-box-arrow-in-right" /> Se connecter</>
+              )}
             </Button>
           </form>
 

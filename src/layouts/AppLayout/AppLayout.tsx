@@ -3,7 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Sidebar } from '@/components/organisms/Sidebar'
 import { useAuth } from '@/auth/AuthContext'
 import { navMain, navManagement } from '@/config/navigation'
-import { currentUser } from '@/data/dashboard'
+import { ROLE_LABELS } from '@/services/authApi'
 import { paths } from '@/router/paths'
 import styles from './AppLayout.module.css'
 
@@ -11,8 +11,12 @@ import styles from './AppLayout.module.css'
  * Coquille applicative : sidebar (fixe sur desktop, tiroir sur mobile) + zone principale.
  * Les pages enfants sont rendues via <Outlet /> et fournissent leur propre Topbar.
  */
+function initials(nom: string, prenom: string): string {
+  return `${prenom.charAt(0)}${nom.charAt(0)}`.toUpperCase()
+}
+
 export function AppLayout() {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -65,7 +69,15 @@ export function AppLayout() {
       <Sidebar
         navMain={navMain}
         navManagement={navManagement}
-        user={currentUser}
+        user={
+          user
+            ? {
+                initials: initials(user.nom, user.prenom),
+                name: `${user.prenom} ${user.nom}`,
+                role: user.agenceNom ? `${ROLE_LABELS[user.role]} · ${user.agenceNom}` : ROLE_LABELS[user.role],
+              }
+            : { initials: '?', name: '—', role: '—' }
+        }
         onLogout={handleLogout}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}

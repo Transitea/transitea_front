@@ -2,7 +2,8 @@ import { Button } from '@/components/atoms/Button'
 import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
 import { FormField } from '@/components/molecules/FormField'
-import { currentUser } from '@/data/dashboard'
+import { useAuth } from '@/auth/AuthContext'
+import { ROLE_LABELS } from '@/services/authApi'
 import styles from './ParametresPage.module.css'
 
 interface ToggleRowProps {
@@ -27,6 +28,8 @@ function ToggleRow({ title, description, defaultChecked }: ToggleRowProps) {
 }
 
 export function ParametresPage() {
+  const { user } = useAuth()
+
   return (
     <>
       <Topbar title="Paramètres" subtitle="Gérez votre compte et vos préférences" />
@@ -36,10 +39,28 @@ export function ParametresPage() {
           <Card title="Profil">
             <div className={styles.body}>
               <div className={styles.grid}>
-                <FormField id="name" label="Nom complet" icon="bi-person" defaultValue={currentUser.name} />
-                <FormField id="role" label="Rôle" icon="bi-briefcase" defaultValue={currentUser.role} />
-                <FormField id="email2" label="Email" type="email" icon="bi-envelope" defaultValue="jean-marie@transitea.app" />
-                <FormField id="phone2" label="Téléphone" icon="bi-telephone" defaultValue="+243 810 000 000" />
+                <FormField
+                  id="name"
+                  label="Nom complet"
+                  icon="bi-person"
+                  defaultValue={user ? `${user.prenom} ${user.nom}` : ''}
+                />
+                <FormField
+                  id="role"
+                  label="Rôle"
+                  icon="bi-briefcase"
+                  defaultValue={user ? ROLE_LABELS[user.role] : ''}
+                  disabled
+                />
+                <FormField
+                  id="agence"
+                  label="Agence"
+                  icon="bi-shop"
+                  defaultValue={user?.agenceNom ?? 'Toutes les agences (enseigne)'}
+                  disabled
+                />
+                <FormField id="email2" label="Email" type="email" icon="bi-envelope" defaultValue={user?.email ?? ''} />
+                <FormField id="phone2" label="Téléphone" icon="bi-telephone" defaultValue={user?.telephone ?? ''} />
               </div>
               <div className={styles.footer}>
                 <Button variant="primary">

@@ -1,4 +1,4 @@
-/** Données mockées diverses (clients, itinéraires, notifications). */
+/** Données mockées diverses (clients, notifications). */
 
 export interface Client {
   id: string
@@ -15,24 +15,6 @@ export const clients: Client[] = [
   { id: 'c4', name: 'Christian K.', phone: '+243 810 000 004', city: 'Kisangani', packagesCount: 3 },
   { id: 'c5', name: 'Fiston B.', phone: '+243 810 000 005', city: 'Matadi', packagesCount: 17 },
   { id: 'c6', name: 'Grâce N.', phone: '+243 810 000 006', city: 'Kananga', packagesCount: 6 },
-]
-
-export interface Route {
-  id: string
-  from: string
-  to: string
-  stops: string[]
-  distanceKm: number
-  durationDays: number
-  active: boolean
-}
-
-export const routes: Route[] = [
-  { id: 'r1', from: 'Kinshasa', to: 'Lubumbashi', stops: ['Kikwit', 'Kolwezi'], distanceKm: 1580, durationDays: 3, active: true },
-  { id: 'r2', from: 'Kinshasa', to: 'Mbuji-Mayi', stops: ['Kikwit'], distanceKm: 1080, durationDays: 2, active: true },
-  { id: 'r3', from: 'Kinshasa', to: 'Goma', stops: ['Kisangani', 'Butembo'], distanceKm: 2600, durationDays: 5, active: true },
-  { id: 'r4', from: 'Kinshasa', to: 'Matadi', stops: ['Kenge'], distanceKm: 350, durationDays: 1, active: true },
-  { id: 'r5', from: 'Kinshasa', to: 'Kisangani', stops: ['Buta'], distanceKm: 1300, durationDays: 4, active: false },
 ]
 
 export interface AppNotification {

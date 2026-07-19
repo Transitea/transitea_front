@@ -2,9 +2,10 @@ import { lazy, Suspense, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/atoms/Button'
 import { Input } from '@/components/atoms/Input'
+import { StatusBadge } from '@/components/atoms/StatusBadge'
 import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
-import { getPackageById } from '@/data/packages'
+import { rechercherColis, retirerColis, type ColisReponse } from '@/services/colisApi'
 import { paths } from '@/router/paths'
 import styles from './ScanPage.module.css'
 
@@ -24,33 +25,81 @@ export function ScanPage() {
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [scanning, setScanning] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [retire, setRetire] = useState<ColisReponse | null>(null)
 
-  /** Ouvre le colis si le code existe, sinon affiche une erreur. */
-  const openPackage = (raw: string) => {
-    const id = extractCode(raw)
-    if (getPackageById(id)) {
-      navigate(paths.colisDetail(id))
-    } else {
-      setError(`Aucun colis trouvé pour « ${id} ».`)
+  /** Recherche le colis par code de suivi, puis valide le retrait s'il est prêt. */
+  const handleCode = async (raw: string) => {
+    const trackingCode = extractCode(raw)
+    setError('')
+    setRetire(null)
+    setLoading(true)
+    try {
+      const result = await rechercherColis(trackingCode)
+      const found = result.contenu.find((c) => c.codeTracking.toUpperCase() === trackingCode)
+
+      if (!found) {
+        setError(`Aucun colis trouvé pour « ${trackingCode} ».`)
+        return
+      }
+
+      if (found.statutActuel === 'ARRIVE_AGENCE') {
+        const updated = await retirerColis(found.codeTracking)
+        setRetire(updated)
+      } else {
+        // Le colis n'est pas encore prêt pour le retrait : on ouvre sa fiche.
+        navigate(paths.colisDetail(String(found.id)))
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la recherche du colis')
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleManual = (e: FormEvent) => {
     e.preventDefault()
-    setError('')
     if (!code.trim()) return
-    openPackage(code)
+    handleCode(code)
   }
 
   const handleScanResult = (text: string) => {
     setScanning(false)
-    setError('')
-    openPackage(text)
+    handleCode(text)
+  }
+
+  if (retire) {
+    return (
+      <>
+        <Topbar title="Retrait validé" subtitle={retire.codeTracking} />
+        <div className="app-content">
+          <Card>
+            <div className={styles.success}>
+              <i className="bi bi-check-circle-fill" />
+              <h2>Colis retiré avec succès</h2>
+              <p>
+                {retire.destinataireNom} a récupéré le colis {retire.codeTracking} à l'agence{' '}
+                {retire.agenceRetraitNom}. L'expéditeur a été notifié.
+              </p>
+              <StatusBadge status={retire.statutActuel} />
+              <div className={styles.successActions}>
+                <Button variant="ghost" onClick={() => setRetire(null)}>
+                  <i className="bi bi-qr-code-scan" /> Scanner un autre colis
+                </Button>
+                <Button variant="primary" onClick={() => navigate(paths.colisDetail(String(retire.id)))}>
+                  Voir le colis
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </>
+    )
   }
 
   return (
     <>
-      <Topbar title="Scanner un colis" subtitle="Identifiez un colis pour le mettre à jour" />
+      <Topbar title="Scanner un colis" subtitle="Retrait sécurisé par scan du QR code" />
 
       <div className="app-content">
         <div className={styles.wrap}>
@@ -58,7 +107,7 @@ export function ScanPage() {
           <div className={styles.scanCard}>
             <i className={`bi bi-qr-code-scan ${styles.scanIcon}`} />
             <h2>Scanner le QR code</h2>
-            <p>Visez l'étiquette collée sur le colis</p>
+            <p>Visez le QR code présenté par le destinataire</p>
             <Button className={styles.scanBtn} onClick={() => setScanning(true)}>
               <i className="bi bi-camera" /> Ouvrir la caméra
             </Button>
@@ -73,7 +122,7 @@ export function ScanPage() {
               <Input
                 id="code"
                 icon="bi-upc-scan"
-                placeholder="TRA-2024-000001"
+                placeholder="TRA-2026-000001"
                 value={code}
                 onChange={(e) => {
                   setCode(e.target.value)
@@ -86,8 +135,8 @@ export function ScanPage() {
                   <i className="bi bi-exclamation-circle" /> {error}
                 </div>
               )}
-              <Button type="submit" variant="primary" style={{ justifyContent: 'center' }}>
-                <i className="bi bi-box-arrow-in-right" /> Accéder au colis
+              <Button type="submit" variant="primary" disabled={loading} style={{ justifyContent: 'center' }}>
+                {loading ? 'Recherche…' : <><i className="bi bi-box-arrow-in-right" /> Accéder au colis</>}
               </Button>
             </form>
           </Card>
