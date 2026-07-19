@@ -1,18 +1,25 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/atoms/Button'
 import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
 import { FormField } from '@/components/molecules/FormField'
+import { SelectField } from '@/components/molecules/SelectField'
 import { creerColis } from '@/services/colisApi'
+import { listerAgences, type AgenceReponse } from '@/services/agenceApi'
+import { useAuth } from '@/auth/AuthContext'
 import { paths } from '@/router/paths'
 import styles from './NouveauColisPage.module.css'
 
 const initialState = {
+  agenceOrigineId: '',
+  agenceRetraitId: '',
   expediteurNom: '',
   expediteurTelephone: '',
+  expediteurEmail: '',
   destinataireNom: '',
   destinataireTelephone: '',
+  destinataireEmail: '',
   destinataireVille: '',
   destinataireAdresse: '',
   description: '',
@@ -21,9 +28,23 @@ const initialState = {
 
 export function NouveauColisPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [form, setForm] = useState(initialState)
+  const [agences, setAgences] = useState<AgenceReponse[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    listerAgences()
+      .then((list) => {
+        setAgences(list)
+        // Présélectionne l'agence de dépôt avec celle de l'utilisateur connecté.
+        if (user?.agenceId) {
+          setForm((prev) => ({ ...prev, agenceOrigineId: String(user.agenceId) }))
+        }
+      })
+      .catch(() => {})
+  }, [user])
 
   const update = (field: keyof typeof initialState, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -31,13 +52,27 @@ export function NouveauColisPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    if (!form.agenceOrigineId || !form.agenceRetraitId) {
+      setError("L'agence de dépôt et l'agence de retrait sont obligatoires")
+      return
+    }
+    if (form.agenceOrigineId === form.agenceRetraitId) {
+      setError("L'agence de retrait doit être différente de l'agence de dépôt")
+      return
+    }
+
     setLoading(true)
     try {
       await creerColis({
+        agenceOrigineId: Number(form.agenceOrigineId),
+        agenceRetraitId: Number(form.agenceRetraitId),
         expediteurNom: form.expediteurNom,
         expediteurTelephone: form.expediteurTelephone || undefined,
+        expediteurEmail: form.expediteurEmail || undefined,
         destinataireNom: form.destinataireNom,
         destinataireTelephone: form.destinataireTelephone || undefined,
+        destinataireEmail: form.destinataireEmail || undefined,
         destinataireVille: form.destinataireVille || undefined,
         destinataireAdresse: form.destinataireAdresse || undefined,
         description: form.description || undefined,
@@ -51,9 +86,11 @@ export function NouveauColisPage() {
     }
   }
 
+  const agenceOptions = agences.map((a) => ({ value: a.id, label: `${a.nom} (${a.ville})` }))
+
   return (
     <>
-      <Topbar title="Nouveau colis" subtitle="Enregistrer une nouvelle expédition" />
+      <Topbar title="Nouveau colis" subtitle="Enregistrer un dépôt en agence" />
 
       <div className="app-content">
         <button className={styles.back} onClick={() => navigate(paths.colis)}>
@@ -66,6 +103,26 @@ export function NouveauColisPage() {
               <p style={{ color: 'var(--red, #dc2626)', margin: '0 0 8px', fontSize: 13 }}>{error}</p>
             )}
             <div className={styles.grid}>
+              <SelectField
+                id="agenceOrigineId"
+                label="Agence de dépôt"
+                icon="bi-shop"
+                placeholder="Sélectionner l'agence de dépôt…"
+                options={agenceOptions}
+                value={form.agenceOrigineId}
+                onChange={(e) => update('agenceOrigineId', e.target.value)}
+                required
+              />
+              <SelectField
+                id="agenceRetraitId"
+                label="Agence de retrait"
+                icon="bi-signpost-split"
+                placeholder="Sélectionner l'agence de retrait…"
+                options={agenceOptions}
+                value={form.agenceRetraitId}
+                onChange={(e) => update('agenceRetraitId', e.target.value)}
+                required
+              />
               <FormField
                 id="expediteurNom"
                 label="Expéditeur"
@@ -79,9 +136,18 @@ export function NouveauColisPage() {
                 id="expediteurTelephone"
                 label="Téléphone expéditeur"
                 icon="bi-telephone"
-                placeholder="+243 …"
+                placeholder="+33 …"
                 value={form.expediteurTelephone}
                 onChange={(e) => update('expediteurTelephone', e.target.value)}
+              />
+              <FormField
+                id="expediteurEmail"
+                label="Email expéditeur"
+                type="email"
+                icon="bi-envelope"
+                placeholder="expediteur@exemple.com"
+                value={form.expediteurEmail}
+                onChange={(e) => update('expediteurEmail', e.target.value)}
               />
               <FormField
                 id="destinataireNom"
@@ -101,8 +167,17 @@ export function NouveauColisPage() {
                 onChange={(e) => update('destinataireTelephone', e.target.value)}
               />
               <FormField
+                id="destinataireEmail"
+                label="Email destinataire"
+                type="email"
+                icon="bi-envelope"
+                placeholder="destinataire@exemple.com"
+                value={form.destinataireEmail}
+                onChange={(e) => update('destinataireEmail', e.target.value)}
+              />
+              <FormField
                 id="destinataireVille"
-                label="Ville de destination"
+                label="Ville du destinataire"
                 icon="bi-geo-alt"
                 placeholder="Lubumbashi, Goma…"
                 value={form.destinataireVille}

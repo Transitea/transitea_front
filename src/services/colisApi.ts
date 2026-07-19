@@ -1,10 +1,10 @@
-import { apiFetch } from './api'
+import { apiFetch, apiFetchBlobUrl } from './api'
 import type { PackageStatus } from '@/components/atoms/StatusBadge'
 
 export interface MiseAJourStatutReponse {
   id: number
   statut: PackageStatus
-  ancienStatut: PackageStatus
+  ancienStatut: PackageStatus | null
   localisation: string | null
   commentaire: string | null
   utilisateurId: number
@@ -15,8 +15,10 @@ export interface ColisReponse {
   id: number
   uuid: string
   codeTracking: string
-  transporteurId: number
-  transporteurNomComplet: string
+  agenceOrigineId: number
+  agenceOrigineNom: string
+  agenceRetraitId: number
+  agenceRetraitNom: string
   expediteurNom: string
   expediteurTelephone: string | null
   expediteurEmail: string | null
@@ -49,6 +51,8 @@ export interface PageReponse<T> {
 }
 
 export interface CreationColisPayload {
+  agenceOrigineId: number
+  agenceRetraitId: number
   expediteurNom: string
   expediteurTelephone?: string
   expediteurEmail?: string
@@ -105,6 +109,17 @@ export function mettreAJourStatut(
     method: 'PATCH',
     body: JSON.stringify({ statut, localisation, commentaire }),
   })
+}
+
+/** Retrait sécurisé : valide le scan du QR code présenté par le destinataire à l'agence. */
+export function retirerColis(codeTracking: string): Promise<ColisReponse> {
+  const qs = new URLSearchParams({ codeTracking })
+  return apiFetch<ColisReponse>(`/v1/colis/retrait?${qs}`, { method: 'POST' })
+}
+
+/** Récupère le QR code (PNG) du colis, authentifié, sous forme d'object URL affichable dans une <img>. */
+export function obtenirQrCodeUrl(id: number): Promise<string> {
+  return apiFetchBlobUrl(`/v1/colis/${id}/qrcode`)
 }
 
 export function supprimerColis(id: number): Promise<void> {

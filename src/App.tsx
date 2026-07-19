@@ -9,7 +9,7 @@ import { ColisPage } from '@/pages/ColisPage'
 import { ColisDetailPage } from '@/pages/ColisDetailPage'
 import { NouveauColisPage } from '@/pages/NouveauColisPage'
 import { ClientsPage } from '@/pages/ClientsPage'
-import { ItinerairesPage } from '@/pages/ItinerairesPage'
+import { AgencesPage } from '@/pages/AgencesPage'
 import { NotificationsPage } from '@/pages/NotificationsPage'
 import { RapportsPage } from '@/pages/RapportsPage'
 import { ParametresPage } from '@/pages/ParametresPage'
@@ -30,7 +30,7 @@ function App() {
           <Route path={paths.colisNouveau} element={<NouveauColisPage />} />
           <Route path={paths.colisDetail()} element={<ColisDetailPage />} />
           <Route path={paths.clients} element={<ClientsPage />} />
-          <Route path={paths.itineraires} element={<ItinerairesPage />} />
+          <Route path={paths.agences} element={<AgencesPage />} />
           <Route path={paths.notifications} element={<NotificationsPage />} />
           <Route path={paths.rapports} element={<RapportsPage />} />
           <Route path={paths.parametres} element={<ParametresPage />} />

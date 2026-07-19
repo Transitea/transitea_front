@@ -1,5 +1,7 @@
 import { apiFetch } from './api'
 
+export type Role = 'ADMIN' | 'OPERATEUR' | 'AGENT'
+
 export interface UtilisateurReponse {
   id: number
   uuid: string
@@ -7,8 +9,10 @@ export interface UtilisateurReponse {
   prenom: string
   email: string
   telephone: string
-  role: string
+  role: Role
   statut: string
+  agenceId: number | null
+  agenceNom: string | null
 }
 
 export interface AuthReponse {
@@ -35,4 +39,11 @@ export function logout(refreshToken: string): Promise<void> {
 
 export function getProfile(): Promise<UtilisateurReponse> {
   return apiFetch<UtilisateurReponse>('/v1/auth/me')
+}
+
+/** Libellé FR d'un rôle (cf. cahier des charges section 3.1.1). */
+export const ROLE_LABELS: Record<Role, string> = {
+  ADMIN: 'Administrateur',
+  OPERATEUR: "Responsable d'agence",
+  AGENT: 'Agent',
 }

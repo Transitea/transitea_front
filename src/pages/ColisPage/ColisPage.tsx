@@ -99,7 +99,7 @@ export function ColisPage() {
                 <thead>
                   <tr>
                     <th>Code suivi</th>
-                    <th>Destination</th>
+                    <th>Agence de retrait</th>
                     <th>Client</th>
                     <th>Statut</th>
                     <th>Date</th>
@@ -117,8 +117,8 @@ export function ColisPage() {
                       </td>
                       <td>
                         <div className={styles.dest}>
-                          {p.destinataireVille ?? '—'}
-                          <span>{p.destinataireAdresse ?? ''}</span>
+                          {p.agenceRetraitNom}
+                          <span>{p.destinataireVille ?? ''}</span>
                         </div>
                       </td>
                       <td>{p.destinataireNom}</td>

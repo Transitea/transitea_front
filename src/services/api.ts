@@ -69,3 +69,33 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   if (res.status === 204) return undefined as T
   return res.json() as Promise<T>
 }
+
+/** Comme apiFetch, mais pour les réponses binaires (ex. QR code PNG). Renvoie une object URL. */
+export async function apiFetchBlobUrl(path: string, init: RequestInit = {}): Promise<string> {
+  let token = getAccessToken()
+
+  const doFetch = (t: string | null) =>
+    fetch(`${BASE_URL}${path}`, {
+      ...init,
+      headers: {
+        ...(t ? { Authorization: `Bearer ${t}` } : {}),
+        ...(init.headers as Record<string, string> | undefined),
+      },
+    })
+
+  let res = await doFetch(token)
+
+  if (res.status === 401 && token) {
+    token = await refreshAccessToken()
+    if (token) {
+      res = await doFetch(token)
+    }
+  }
+
+  if (!res.ok) {
+    throw new Error(`Erreur ${res.status}`)
+  }
+
+  const blob = await res.blob()
+  return URL.createObjectURL(blob)
+}

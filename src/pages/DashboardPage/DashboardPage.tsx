@@ -10,6 +10,7 @@ import { ActivityFeed } from '@/components/organisms/ActivityFeed'
 import { paths } from '@/router/paths'
 import { syncStatus, recentActivity } from '@/data/dashboard'
 import { obtenirStatistiques, listerColis, type ColisReponse } from '@/services/colisApi'
+import { useAuth } from '@/auth/AuthContext'
 import type { StatCardProps } from '@/components/molecules/StatCard'
 import type { Package } from '@/data/dashboard'
 import styles from './DashboardPage.module.css'
@@ -23,8 +24,8 @@ function formatDate(iso: string): string {
 function colisToPackage(c: ColisReponse): Package {
   return {
     trackingCode: c.codeTracking,
-    destination: c.destinataireVille ?? '—',
-    via: c.destinataireAdresse ?? '',
+    destination: c.agenceRetraitNom,
+    via: c.destinataireVille ?? '',
     client: c.destinataireNom,
     status: c.statutActuel,
     date: formatDate(c.dateCreation),
@@ -33,18 +34,21 @@ function colisToPackage(c: ColisReponse): Package {
 
 export function DashboardPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [stats, setStats] = useState<StatCardProps[]>([])
   const [recentPackages, setRecentPackages] = useState<Package[]>([])
 
   useEffect(() => {
     obtenirStatistiques().then((s) => {
-      const enTransit = (s.parStatut['EN_TRANSIT'] ?? 0) + (s.parStatut['PRIS_EN_CHARGE'] ?? 0)
-      const livres = s.parStatut['LIVRE'] ?? 0
+      const enTransit = s.parStatut['EN_TRANSIT'] ?? 0
+      const enAttenteRetrait = s.parStatut['ARRIVE_AGENCE'] ?? 0
+      const retires = s.parStatut['RETIRE'] ?? 0
       const problemes = (s.parStatut['REFUSE'] ?? 0) + (s.parStatut['RETOUR_EXPEDITEUR'] ?? 0)
       setStats([
         { icon: 'bi-box-seam', tone: 'blue', label: "Total colis", value: s.total, delta: '' },
         { icon: 'bi-truck', tone: 'gold', label: 'En transit', value: enTransit, delta: 'En cours' },
-        { icon: 'bi-check-circle', tone: 'green', label: 'Livrés', value: livres, delta: '' },
+        { icon: 'bi-qr-code-scan', tone: 'gold', label: 'En attente de retrait', value: enAttenteRetrait, delta: '' },
+        { icon: 'bi-check-circle', tone: 'green', label: 'Retirés', value: retires, delta: '' },
         { icon: 'bi-exclamation-triangle', tone: 'red', label: 'Problèmes', value: problemes, delta: '', deltaDirection: problemes > 0 ? 'down' : undefined },
       ])
     }).catch(() => {})
@@ -62,7 +66,7 @@ export function DashboardPage() {
     <>
       <Topbar
         title="Tableau de bord"
-        subtitle={`${today.charAt(0).toUpperCase()}${today.slice(1)} · Kinshasa`}
+        subtitle={`${today.charAt(0).toUpperCase()}${today.slice(1)}${user?.agenceNom ? ` · ${user.agenceNom}` : ''}`}
         actions={
           <>
             <Pill tone="success">Connecté · Synchro OK</Pill>

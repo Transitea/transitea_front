@@ -7,7 +7,7 @@ export const paths = {
   colisNouveau: '/colis/nouveau',
   colisDetail: (id = ':id') => `/colis/${id}`,
   clients: '/clients',
-  itineraires: '/itineraires',
+  agences: '/agences',
   notifications: '/notifications',
   rapports: '/rapports',
   parametres: '/parametres',

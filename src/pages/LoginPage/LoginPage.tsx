@@ -54,7 +54,7 @@ export function LoginPage() {
               <i className="bi bi-whatsapp" /> Notifications WhatsApp
             </li>
             <li>
-              <i className="bi bi-geo-alt" /> Itinéraires sur tout le territoire
+              <i className="bi bi-geo-alt" /> Réseau d'agences France ↔ RDC
             </li>
           </ul>
         </div>

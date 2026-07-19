@@ -4,7 +4,13 @@ import { StatusBadge, type PackageStatus, STATUS_META } from '@/components/atoms
 import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
 import { UpdateStatusSheet } from '@/components/organisms/UpdateStatusSheet'
-import { obtenirColis, mettreAJourStatut, type ColisReponse } from '@/services/colisApi'
+import {
+  obtenirColis,
+  mettreAJourStatut,
+  retirerColis,
+  obtenirQrCodeUrl,
+  type ColisReponse,
+} from '@/services/colisApi'
 import { paths } from '@/router/paths'
 import styles from './ColisDetailPage.module.css'
 
@@ -21,6 +27,9 @@ export function ColisDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [retraitLoading, setRetraitLoading] = useState(false)
+  const [qrUrl, setQrUrl] = useState<string | null>(null)
+  const [showQr, setShowQr] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -31,6 +40,13 @@ export function ColisDetailPage() {
       .finally(() => setLoading(false))
   }, [id])
 
+  // Libère l'object URL du QR code à la fermeture / au démontage.
+  useEffect(() => {
+    return () => {
+      if (qrUrl) URL.revokeObjectURL(qrUrl)
+    }
+  }, [qrUrl])
+
   const handleUpdate = async (status: PackageStatus, comment: string) => {
     if (!pkg) return
     try {
@@ -40,6 +56,33 @@ export function ColisDetailPage() {
       alert(err instanceof Error ? err.message : 'Erreur lors de la mise à jour')
     }
     setSheetOpen(false)
+  }
+
+  const handleRetrait = async () => {
+    if (!pkg) return
+    setRetraitLoading(true)
+    try {
+      const updated = await retirerColis(pkg.codeTracking)
+      setPkg(updated)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erreur lors du retrait')
+    } finally {
+      setRetraitLoading(false)
+    }
+  }
+
+  const handleShowQr = async () => {
+    if (!pkg) return
+    if (!qrUrl) {
+      try {
+        const url = await obtenirQrCodeUrl(pkg.id)
+        setQrUrl(url)
+      } catch {
+        alert('Impossible de charger le QR code')
+        return
+      }
+    }
+    setShowQr(true)
   }
 
   if (loading) {
@@ -89,8 +132,9 @@ export function ColisDetailPage() {
                 <StatusBadge status={pkg.statutActuel} />
               </div>
               <div className={styles.route}>
-                {pkg.destinataireVille ?? '—'}
-                {pkg.destinataireAdresse ? ` · ${pkg.destinataireAdresse}` : ''}
+                <i className="bi bi-shop" /> {pkg.agenceOrigineNom}
+                {' '}<i className="bi bi-arrow-right" />{' '}
+                <i className="bi bi-shop" /> {pkg.agenceRetraitNom}
               </div>
 
               <ul className={styles.timeline}>
@@ -116,6 +160,14 @@ export function ColisDetailPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <Card title="Informations">
               <div className={styles.body}>
+                <div className={styles.infoRow}>
+                  <span>Agence de dépôt</span>
+                  <strong>{pkg.agenceOrigineNom}</strong>
+                </div>
+                <div className={styles.infoRow}>
+                  <span>Agence de retrait</span>
+                  <strong>{pkg.agenceRetraitNom}</strong>
+                </div>
                 <div className={styles.infoRow}>
                   <span>Destinataire</span>
                   <strong>{pkg.destinataireNom}</strong>
@@ -147,14 +199,17 @@ export function ColisDetailPage() {
 
             <Card title="Actions">
               <div className={styles.actions}>
-                <button className={styles.updateBtn} onClick={() => setSheetOpen(true)}>
+                {pkg.statutActuel === 'ARRIVE_AGENCE' && (
+                  <button className={styles.updateBtn} onClick={handleRetrait} disabled={retraitLoading}>
+                    <i className="bi bi-qr-code-scan" />
+                    {retraitLoading ? 'Retrait en cours…' : 'Valider le retrait (scan QR)'}
+                  </button>
+                )}
+                <button className={styles.actionBtn} onClick={() => setSheetOpen(true)}>
                   <i className="bi bi-arrow-repeat" /> Mettre à jour le statut
                 </button>
-                <button className={styles.actionBtn}>
-                  <i className={`bi bi-whatsapp ${styles.whatsapp}`} /> Notifier par WhatsApp
-                </button>
-                <button className={styles.actionBtn}>
-                  <i className={`bi bi-envelope ${styles.mail}`} /> Envoyer un email
+                <button className={styles.actionBtn} onClick={handleShowQr}>
+                  <i className="bi bi-qr-code" /> Afficher le QR code
                 </button>
               </div>
             </Card>
@@ -169,6 +224,18 @@ export function ColisDetailPage() {
           onConfirm={handleUpdate}
           onClose={() => setSheetOpen(false)}
         />
+      )}
+
+      {showQr && qrUrl && (
+        <div className={styles.qrOverlay} onClick={() => setShowQr(false)}>
+          <div className={styles.qrModal} onClick={(e) => e.stopPropagation()}>
+            <img src={qrUrl} alt={`QR code du colis ${pkg.codeTracking}`} />
+            <p>{pkg.codeTracking}</p>
+            <button className={styles.actionBtn} onClick={() => setShowQr(false)}>
+              Fermer
+            </button>
+          </div>
+        </div>
       )}
     </>
   )

@@ -6,7 +6,7 @@ export const navMain: NavItemProps[] = [
   { icon: 'bi-speedometer2', label: 'Dashboard', path: paths.dashboard, end: true },
   { icon: 'bi-qr-code-scan', label: 'Scanner', path: paths.scan },
   { icon: 'bi-box-seam', label: 'Colis', path: paths.colis, badge: 54 },
-  { icon: 'bi-map', label: 'Itinéraires', path: paths.itineraires },
+  { icon: 'bi-shop', label: 'Agences', path: paths.agences },
   { icon: 'bi-people', label: 'Clients', path: paths.clients },
 ]
 
