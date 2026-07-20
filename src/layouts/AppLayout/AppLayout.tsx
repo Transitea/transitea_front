@@ -67,8 +67,8 @@ export function AppLayout() {
       )}
 
       <Sidebar
-        navMain={navMain}
-        navManagement={navManagement}
+        navMain={navMain.filter((item) => !item.adminOnly || user?.role === 'ADMIN')}
+        navManagement={navManagement.filter((item) => !item.adminOnly || user?.role === 'ADMIN')}
         user={
           user
             ? {

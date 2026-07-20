@@ -1,54 +1,105 @@
+import { useEffect, useState } from 'react'
 import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
 import { StatsGrid } from '@/components/organisms/StatsGrid'
+import { obtenirVolumeQuotidien, type VolumeJourReponse } from '@/services/colisApi'
 import type { StatCardProps } from '@/components/molecules/StatCard'
 import styles from './RapportsPage.module.css'
 
-const reportStats: StatCardProps[] = [
-  { icon: 'bi-box-seam', tone: 'blue', label: 'Colis ce mois', value: 1248, delta: '+9% vs mois dernier' },
-  { icon: 'bi-check-circle', tone: 'green', label: 'Taux de livraison', value: '94%', delta: '+2 pts' },
-  { icon: 'bi-clock-history', tone: 'gold', label: 'Délai moyen', value: '2,8 j', delta: 'stable' },
-  { icon: 'bi-cash-stack', tone: 'green', label: 'Chiffre d’affaires', value: '8,4 M FC', delta: '+12%' },
-]
+function toDateInput(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
 
-const weekly = [
-  { label: 'Lun', value: 42 },
-  { label: 'Mar', value: 58 },
-  { label: 'Mer', value: 35 },
-  { label: 'Jeu', value: 71 },
-  { label: 'Ven', value: 64 },
-  { label: 'Sam', value: 87 },
-  { label: 'Dim', value: 23 },
-]
+function formatJour(iso: string): string {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const jours = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
+  return `${jours[d.getDay()]} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}`
+}
 
 export function RapportsPage() {
-  const max = Math.max(...weekly.map((d) => d.value))
+  const today = new Date()
+  const ilYaSeptJours = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000)
+
+  const [debut, setDebut] = useState(toDateInput(ilYaSeptJours))
+  const [fin, setFin] = useState(toDateInput(today))
+  const [volume, setVolume] = useState<VolumeJourReponse[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    obtenirVolumeQuotidien(debut, fin)
+      .then(setVolume)
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur de chargement'))
+      .finally(() => setLoading(false))
+  }, [debut, fin])
+
+  const max = Math.max(1, ...volume.map((d) => d.total))
+  const totalPeriode = volume.reduce((acc, d) => acc + d.total, 0)
+  const moyenneParJour = volume.length ? Math.round((totalPeriode / volume.length) * 10) / 10 : 0
+  const pic = volume.reduce((plusCharge, d) => (d.total > plusCharge.total ? d : plusCharge), volume[0] ?? { date: '', total: 0 })
+
+  const stats: StatCardProps[] = [
+    { icon: 'bi-box-seam', tone: 'blue', label: 'Total colis (période)', value: totalPeriode },
+    { icon: 'bi-graph-up', tone: 'gold', label: 'Moyenne par jour', value: moyenneParJour },
+    {
+      icon: 'bi-lightning-charge',
+      tone: 'green',
+      label: 'Jour le plus chargé',
+      value: pic.total,
+      delta: pic.date ? formatJour(pic.date) : undefined,
+    },
+  ]
 
   return (
     <>
-      <Topbar title="Rapports" subtitle="Vue d'ensemble de l'activité" />
+      <Topbar title="Rapports" subtitle="Volume de colis sur une période" />
 
       <div className="app-content">
-        <StatsGrid stats={reportStats} />
-
-        <div className={styles.section}>
-          <Card title="Colis traités cette semaine" subtitle="Nombre de colis par jour">
-            <div className={styles.chartCard}>
-              <div className={styles.chart}>
-                {weekly.map((d) => (
-                  <div key={d.label} className={styles.bar}>
-                    <span className={styles.barValue}>{d.value}</span>
-                    <div
-                      className={styles.barFill}
-                      style={{ height: `${(d.value / max) * 100}%` }}
-                    />
-                    <span className={styles.barLabel}>{d.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Card>
+        <div className={styles.dateRow}>
+          <label>
+            Du
+            <input type="date" value={debut} max={fin} onChange={(e) => setDebut(e.target.value)} />
+          </label>
+          <label>
+            Au
+            <input type="date" value={fin} min={debut} max={toDateInput(today)} onChange={(e) => setFin(e.target.value)} />
+          </label>
         </div>
+
+        {error && (
+          <Card>
+            <div style={{ padding: 24, textAlign: 'center', color: 'var(--red, #dc2626)' }}>{error}</div>
+          </Card>
+        )}
+
+        {!error && (
+          <>
+            <StatsGrid stats={stats} />
+
+            <div className={styles.section}>
+              <Card title="Colis enregistrés par jour" subtitle={loading ? 'Chargement…' : `${volume.length} jour(s)`}>
+                <div className={styles.chartCard}>
+                  <div className={styles.chart}>
+                    {volume.map((d) => (
+                      <div key={d.date} className={styles.bar}>
+                        <span className={styles.barValue}>{d.total}</span>
+                        <div
+                          className={styles.barFill}
+                          style={{ height: `${(d.total / max) * 100}%` }}
+                        />
+                        <span className={styles.barLabel}>{formatJour(d.date)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </>
+        )}
       </div>
     </>
   )

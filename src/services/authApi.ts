@@ -30,6 +30,23 @@ export function login(email: string, motDePasse: string): Promise<AuthReponse> {
   })
 }
 
+export interface InscriptionPayload {
+  nom: string
+  prenom: string
+  email: string
+  telephone?: string
+  motDePasse: string
+  agenceId: number
+}
+
+/** Auto-inscription publique — le compte créé a toujours le rôle AGENT. */
+export function register(payload: InscriptionPayload): Promise<AuthReponse> {
+  return apiFetch<AuthReponse>('/v1/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function logout(refreshToken: string): Promise<void> {
   return apiFetch<void>('/v1/auth/logout', {
     method: 'POST',
