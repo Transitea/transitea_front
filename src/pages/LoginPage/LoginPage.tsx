@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/atoms/Button'
 import { FormField } from '@/components/molecules/FormField'
 import { useAuth } from '@/auth/AuthContext'
 import { login as apiLogin } from '@/services/authApi'
+import { paths } from '@/router/paths'
 import styles from './LoginPage.module.css'
 
 export function LoginPage() {
@@ -98,9 +99,6 @@ export function LoginPage() {
               <label className={styles.remember}>
                 <input type="checkbox" /> Se souvenir de moi
               </label>
-              <a className={styles.link} href="#">
-                Mot de passe oublié ?
-              </a>
             </div>
 
             <Button type="submit" variant="primary" className={styles.submit} disabled={loading}>
@@ -113,10 +111,18 @@ export function LoginPage() {
           </form>
 
           <div className={styles.footer}>
-            Pas encore de compte ?{' '}
-            <a className={styles.link} href="#">
-              Contactez votre administrateur
-            </a>
+            <p>
+              Pas encore de compte agent ?{' '}
+              <Link className={styles.link} to={paths.inscription}>
+                Créer un compte
+              </Link>
+            </p>
+            <p>
+              Responsable d'agence ou administrateur ?{' '}
+              <a className={styles.link} href="mailto:support@transitea.com">
+                Contactez le support
+              </a>
+            </p>
           </div>
         </div>
       </main>

@@ -9,6 +9,8 @@ export interface NavItemProps {
   /** Correspondance exacte du chemin (utile pour la route racine "/"). */
   end?: boolean
   badge?: number
+  /** Visible uniquement pour le rôle ADMIN (filtré en amont, ignoré par ce composant). */
+  adminOnly?: boolean
 }
 
 export function NavItem({ icon, label, path, end, badge }: NavItemProps) {

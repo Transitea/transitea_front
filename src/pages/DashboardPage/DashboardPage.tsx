@@ -5,15 +5,29 @@ import { Pill } from '@/components/atoms/Pill'
 import { Topbar } from '@/components/organisms/Topbar'
 import { StatsGrid } from '@/components/organisms/StatsGrid'
 import { RecentPackagesTable } from '@/components/organisms/RecentPackagesTable'
-import { SyncCard } from '@/components/organisms/SyncCard'
-import { ActivityFeed } from '@/components/organisms/ActivityFeed'
+import { EnseigneCard } from '@/components/organisms/EnseigneCard'
 import { paths } from '@/router/paths'
-import { syncStatus, recentActivity } from '@/data/dashboard'
 import { obtenirStatistiques, listerColis, type ColisReponse } from '@/services/colisApi'
+import { obtenirEnseigne, type EnseigneReponse } from '@/services/enseigneApi'
 import { useAuth } from '@/auth/AuthContext'
 import type { StatCardProps } from '@/components/molecules/StatCard'
 import type { Package } from '@/data/dashboard'
-import styles from './DashboardPage.module.css'
+
+/** Statut de connectivité réel du navigateur (pas de synchronisation hors-ligne pour l'instant). */
+function useEnLigne(): boolean {
+  const [enLigne, setEnLigne] = useState(navigator.onLine)
+  useEffect(() => {
+    const onOnline = () => setEnLigne(true)
+    const onOffline = () => setEnLigne(false)
+    window.addEventListener('online', onOnline)
+    window.addEventListener('offline', onOffline)
+    return () => {
+      window.removeEventListener('online', onOnline)
+      window.removeEventListener('offline', onOffline)
+    }
+  }, [])
+  return enLigne
+}
 
 function formatDate(iso: string): string {
   const d = new Date(iso)
@@ -35,8 +49,16 @@ function colisToPackage(c: ColisReponse): Package {
 export function DashboardPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const enLigne = useEnLigne()
   const [stats, setStats] = useState<StatCardProps[]>([])
   const [recentPackages, setRecentPackages] = useState<Package[]>([])
+  const [enseigne, setEnseigne] = useState<EnseigneReponse | null>(null)
+
+  useEffect(() => {
+    if (user?.role === 'ADMIN') {
+      obtenirEnseigne().then(setEnseigne).catch(() => {})
+    }
+  }, [user])
 
   useEffect(() => {
     obtenirStatistiques().then((s) => {
@@ -69,7 +91,9 @@ export function DashboardPage() {
         subtitle={`${today.charAt(0).toUpperCase()}${today.slice(1)}${user?.agenceNom ? ` · ${user.agenceNom}` : ''}`}
         actions={
           <>
-            <Pill tone="success">Connecté · Synchro OK</Pill>
+            <Pill tone={enLigne ? 'success' : 'gold'}>
+              <i className={`bi ${enLigne ? 'bi-wifi' : 'bi-wifi-off'}`} /> {enLigne ? 'En ligne' : 'Hors ligne'}
+            </Pill>
             <Button variant="primary" onClick={() => navigate(paths.colisNouveau)}>
               <i className="bi bi-plus-lg" /> Nouveau colis
             </Button>
@@ -80,18 +104,17 @@ export function DashboardPage() {
       <div className="app-content">
         <StatsGrid stats={stats} />
 
-        <div className={styles.grid2}>
-          <RecentPackagesTable
-            packages={recentPackages}
-            subtitle="Derniers colis enregistrés"
-            onSeeAll={() => navigate(paths.colis)}
-          />
-
-          <div className={styles.sideCol}>
-            <SyncCard sync={syncStatus} />
-            <ActivityFeed items={recentActivity} />
+        {enseigne && (
+          <div style={{ maxWidth: 420, marginBottom: 16 }}>
+            <EnseigneCard enseigne={enseigne} />
           </div>
-        </div>
+        )}
+
+        <RecentPackagesTable
+          packages={recentPackages}
+          subtitle="Derniers colis enregistrés"
+          onSeeAll={() => navigate(paths.colis)}
+        />
       </div>
     </>
   )

@@ -41,6 +41,11 @@ export interface StatistiquesReponse {
   parStatut: Partial<Record<PackageStatus, number>>
 }
 
+export interface VolumeJourReponse {
+  date: string
+  total: number
+}
+
 export interface PageReponse<T> {
   contenu: T[]
   pageCourante: number
@@ -88,6 +93,12 @@ export function obtenirStatistiques(): Promise<StatistiquesReponse> {
   return apiFetch<StatistiquesReponse>('/v1/colis/statistiques')
 }
 
+/** Volume de colis par jour sur une période (dates au format YYYY-MM-DD), pour les graphiques de rapports. */
+export function obtenirVolumeQuotidien(debut: string, fin: string): Promise<VolumeJourReponse[]> {
+  const qs = new URLSearchParams({ debut, fin })
+  return apiFetch<VolumeJourReponse[]>(`/v1/colis/volume-quotidien?${qs}`)
+}
+
 export function obtenirColis(id: number): Promise<ColisReponse> {
   return apiFetch<ColisReponse>(`/v1/colis/${id}`)
 }
@@ -120,6 +131,12 @@ export function retirerColis(codeTracking: string): Promise<ColisReponse> {
 /** Récupère le QR code (PNG) du colis, authentifié, sous forme d'object URL affichable dans une <img>. */
 export function obtenirQrCodeUrl(id: number): Promise<string> {
   return apiFetchBlobUrl(`/v1/colis/${id}/qrcode`)
+}
+
+/** Export CSV des colis sur une période (dates au format YYYY-MM-DD) — retourne une object URL téléchargeable. */
+export function exporterColisCsvUrl(debut: string, fin: string): Promise<string> {
+  const qs = new URLSearchParams({ debut, fin })
+  return apiFetchBlobUrl(`/v1/export/colis?${qs}`)
 }
 
 export function supprimerColis(id: number): Promise<void> {

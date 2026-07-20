@@ -6,7 +6,7 @@ import { StatusBadge, type PackageStatus } from '@/components/atoms/StatusBadge'
 import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
 import { statusFilters } from '@/data/packages'
-import { listerColis, rechercherColis, type ColisReponse } from '@/services/colisApi'
+import { listerColis, rechercherColis, exporterColisCsvUrl, type ColisReponse } from '@/services/colisApi'
 import { paths } from '@/router/paths'
 import styles from './ColisPage.module.css'
 
@@ -14,6 +14,11 @@ function formatDate(iso: string): string {
   const d = new Date(iso)
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} · ${pad(d.getHours())}h${pad(d.getMinutes())}`
+}
+
+function toDateInput(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
 export function ColisPage() {
@@ -24,6 +29,34 @@ export function ColisPage() {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const today = new Date()
+  const debutMois = new Date(today.getFullYear(), today.getMonth(), 1)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [exportDebut, setExportDebut] = useState(toDateInput(debutMois))
+  const [exportFin, setExportFin] = useState(toDateInput(today))
+  const [exportLoading, setExportLoading] = useState(false)
+  const [exportError, setExportError] = useState<string | null>(null)
+
+  const handleExport = async () => {
+    setExportLoading(true)
+    setExportError(null)
+    try {
+      const url = await exporterColisCsvUrl(exportDebut, exportFin)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `colis_${exportDebut}_${exportFin}.csv`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+      setExportOpen(false)
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : "Erreur lors de l'export")
+    } finally {
+      setExportLoading(false)
+    }
+  }
 
   const fetchColis = useCallback(async () => {
     setLoading(true)
@@ -58,13 +91,46 @@ export function ColisPage() {
         title="Colis"
         subtitle={loading ? 'Chargement…' : `${total} colis au total`}
         actions={
-          <Button variant="primary" onClick={() => navigate(paths.colisNouveau)}>
-            <i className="bi bi-plus-lg" /> Nouveau colis
-          </Button>
+          <>
+            <Button variant="ghost" onClick={() => setExportOpen((v) => !v)}>
+              <i className="bi bi-download" /> Exporter CSV
+            </Button>
+            <Button variant="primary" onClick={() => navigate(paths.colisNouveau)}>
+              <i className="bi bi-plus-lg" /> Nouveau colis
+            </Button>
+          </>
         }
       />
 
       <div className="app-content">
+        {exportOpen && (
+          <div className={styles.exportBar}>
+            <label>
+              Du
+              <input
+                type="date"
+                value={exportDebut}
+                max={exportFin}
+                onChange={(e) => setExportDebut(e.target.value)}
+              />
+            </label>
+            <label>
+              Au
+              <input
+                type="date"
+                value={exportFin}
+                min={exportDebut}
+                max={toDateInput(today)}
+                onChange={(e) => setExportFin(e.target.value)}
+              />
+            </label>
+            <Button variant="primary" onClick={handleExport} disabled={exportLoading}>
+              {exportLoading ? 'Export…' : <><i className="bi bi-file-earmark-spreadsheet" /> Télécharger</>}
+            </Button>
+            {exportError && <span className={styles.exportError}>{exportError}</span>}
+          </div>
+        )}
+
         <div className={styles.toolbar}>
           <div className={styles.search}>
             <Input
