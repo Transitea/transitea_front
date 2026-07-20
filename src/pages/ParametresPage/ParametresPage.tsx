@@ -1,4 +1,3 @@
-import { Button } from '@/components/atoms/Button'
 import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
 import { FormField } from '@/components/molecules/FormField'
@@ -59,14 +58,25 @@ export function ParametresPage() {
                   defaultValue={user?.agenceNom ?? 'Toutes les agences (enseigne)'}
                   disabled
                 />
-                <FormField id="email2" label="Email" type="email" icon="bi-envelope" defaultValue={user?.email ?? ''} />
-                <FormField id="phone2" label="Téléphone" icon="bi-telephone" defaultValue={user?.telephone ?? ''} />
+                <FormField
+                  id="email2"
+                  label="Email"
+                  type="email"
+                  icon="bi-envelope"
+                  defaultValue={user?.email ?? ''}
+                  disabled
+                />
+                <FormField
+                  id="phone2"
+                  label="Téléphone"
+                  icon="bi-telephone"
+                  defaultValue={user?.telephone ?? ''}
+                  disabled
+                />
               </div>
-              <div className={styles.footer}>
-                <Button variant="primary">
-                  <i className="bi bi-check-lg" /> Enregistrer
-                </Button>
-              </div>
+              <p className={styles.hint}>
+                La modification du profil n'est pas encore disponible. Contactez votre administrateur pour toute mise à jour.
+              </p>
             </div>
           </Card>
 
