@@ -49,7 +49,11 @@
   margin-bottom: 6px;
 }
 
-.nav { flex: 1; padding: 16px 0; }
+/* min-height: 0 est necessaire pour qu'un enfant flex puisse defiler au lieu
+   de deborder du conteneur a hauteur fixe (.sidebar) - sinon, si le contenu
+   (logo + nav + bas de page) depasse la hauteur de la fenetre, le bouton de
+   deconnexion se retrouve pousse hors ecran sans moyen d'y acceder. */
+.nav { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 0; }
 
 .section {
   padding: 8px 20px 4px;
