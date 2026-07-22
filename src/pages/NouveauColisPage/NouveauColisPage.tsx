@@ -5,7 +5,7 @@ import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
 import { FormField } from '@/components/molecules/FormField'
 import { SelectField } from '@/components/molecules/SelectField'
-import { creerColis } from '@/services/colisApi'
+import { creerColisResilient } from '@/offline/offlineColisService'
 import { listerAgences, type AgenceReponse } from '@/services/agenceApi'
 import { useAuth } from '@/auth/AuthContext'
 import { paths } from '@/router/paths'
@@ -64,21 +64,34 @@ export function NouveauColisPage() {
 
     setLoading(true)
     try {
-      await creerColis({
-        agenceOrigineId: Number(form.agenceOrigineId),
-        agenceRetraitId: Number(form.agenceRetraitId),
-        expediteurNom: form.expediteurNom,
-        expediteurTelephone: form.expediteurTelephone || undefined,
-        expediteurEmail: form.expediteurEmail || undefined,
-        destinataireNom: form.destinataireNom,
-        destinataireTelephone: form.destinataireTelephone || undefined,
-        destinataireEmail: form.destinataireEmail || undefined,
-        destinataireVille: form.destinataireVille || undefined,
-        destinataireAdresse: form.destinataireAdresse || undefined,
-        description: form.description || undefined,
-        poids: form.poids ? Number(form.poids) : undefined,
-      })
-      navigate(paths.colis)
+      const agenceOrigine = agences.find((a) => String(a.id) === form.agenceOrigineId)
+      const agenceRetrait = agences.find((a) => String(a.id) === form.agenceRetraitId)
+
+      const resultat = await creerColisResilient(
+        {
+          agenceOrigineId: Number(form.agenceOrigineId),
+          agenceRetraitId: Number(form.agenceRetraitId),
+          expediteurNom: form.expediteurNom,
+          expediteurTelephone: form.expediteurTelephone || undefined,
+          expediteurEmail: form.expediteurEmail || undefined,
+          destinataireNom: form.destinataireNom,
+          destinataireTelephone: form.destinataireTelephone || undefined,
+          destinataireEmail: form.destinataireEmail || undefined,
+          destinataireVille: form.destinataireVille || undefined,
+          destinataireAdresse: form.destinataireAdresse || undefined,
+          description: form.description || undefined,
+          poids: form.poids ? Number(form.poids) : undefined,
+        },
+        { origine: agenceOrigine?.nom, retrait: agenceRetrait?.nom },
+      )
+
+      if (resultat.mode === 'local') {
+        navigate(paths.colis, {
+          state: { message: 'Colis enregistré localement : il sera synchronisé automatiquement dès le retour du réseau.' },
+        })
+      } else {
+        navigate(paths.colis)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors de la création')
     } finally {

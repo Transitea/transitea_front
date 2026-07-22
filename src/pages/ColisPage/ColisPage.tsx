@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { Button } from '@/components/atoms/Button'
 import { Input } from '@/components/atoms/Input'
 import { StatusBadge, type PackageStatus } from '@/components/atoms/StatusBadge'
@@ -7,6 +8,8 @@ import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
 import { statusFilters } from '@/data/packages'
 import { listerColis, rechercherColis, exporterColisCsvUrl, type ColisReponse } from '@/services/colisApi'
+import { db } from '@/offline/db'
+import { EVENEMENT_SYNC_TERMINEE } from '@/offline/syncEngine'
 import { paths } from '@/router/paths'
 import styles from './ColisPage.module.css'
 
@@ -23,12 +26,25 @@ function toDateInput(d: Date): string {
 
 export function ColisPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<PackageStatus | 'all'>('all')
   const [colis, setColis] = useState<ColisReponse[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(
+    (location.state as { message?: string } | null)?.message ?? null,
+  )
+
+  const brouillons = useLiveQuery(
+    async () => {
+      const rows = await db.colisLocal.where('syncStatus').notEqual('synced').sortBy('dateCreation')
+      return rows.reverse()
+    },
+    [],
+    [],
+  )
 
   const today = new Date()
   const debutMois = new Date(today.getFullYear(), today.getMonth(), 1)
@@ -85,6 +101,14 @@ export function ColisPage() {
     return () => clearTimeout(timer)
   }, [fetchColis, search])
 
+  // Rafraîchit la liste serveur une fois qu'une synchronisation vient de se terminer
+  // (les brouillons tout juste synchronisés doivent apparaître ici).
+  useEffect(() => {
+    const onSyncTerminee = () => fetchColis()
+    window.addEventListener(EVENEMENT_SYNC_TERMINEE, onSyncTerminee)
+    return () => window.removeEventListener(EVENEMENT_SYNC_TERMINEE, onSyncTerminee)
+  }, [fetchColis])
+
   return (
     <>
       <Topbar
@@ -103,6 +127,55 @@ export function ColisPage() {
       />
 
       <div className="app-content">
+        {message && (
+          <div className={styles.infoBanner}>
+            <span>{message}</span>
+            <button type="button" onClick={() => setMessage(null)} aria-label="Fermer">
+              <i className="bi bi-x-lg" />
+            </button>
+          </div>
+        )}
+
+        {brouillons.length > 0 && (
+          <Card title={`Brouillons en attente de synchronisation (${brouillons.length})`}>
+            <div className={styles.tableScroll}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Agence de retrait</th>
+                    <th>Client</th>
+                    <th>État</th>
+                    <th>Créé le</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {brouillons.map((b) => (
+                    <tr key={b.localId}>
+                      <td>
+                        <div className={styles.dest}>
+                          {b.agenceRetraitNom ?? `Agence #${b.agenceRetraitId}`}
+                          <span>{b.destinataireVille ?? ''}</span>
+                        </div>
+                      </td>
+                      <td>{b.destinataireNom}</td>
+                      <td>
+                        {b.syncStatus === 'error' ? (
+                          <span className={styles.exportError}>{b.erreurSync ?? 'Échec de synchronisation'}</span>
+                        ) : (
+                          <span className={styles.date}>
+                            <i className="bi bi-clock-history" /> En attente — QR indisponible
+                          </span>
+                        )}
+                      </td>
+                      <td className={styles.date}>{formatDate(b.dateCreation)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
+
         {exportOpen && (
           <div className={styles.exportBar}>
             <label>

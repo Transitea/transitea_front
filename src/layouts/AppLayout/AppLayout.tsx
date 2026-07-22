@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Sidebar } from '@/components/organisms/Sidebar'
+import { SyncStatusIndicator } from '@/components/organisms/SyncStatusIndicator'
 import { useAuth } from '@/auth/AuthContext'
 import { navMain, navManagement } from '@/config/navigation'
 import { ROLE_LABELS } from '@/services/authApi'
@@ -86,6 +87,8 @@ export function AppLayout() {
       <div className={styles.main}>
         <Outlet />
       </div>
+
+      <SyncStatusIndicator />
     </>
   )
 }
