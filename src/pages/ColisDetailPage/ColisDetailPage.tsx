@@ -47,7 +47,11 @@ export function ColisDetailPage() {
     try {
       const resultat = await mettreAJourStatutResilient(pkg.id, pkg.version, status, comment || undefined)
       if (resultat.mode === 'server') {
-        setPkg(resultat.colis)
+        // La reponse de mise a jour n'inclut pas l'historique complet (juste les
+        // champs de base) : on recharge le colis entier pour rester coherent et
+        // eviter un historique vide/manquant dans l'UI.
+        const complet = await obtenirColis(pkg.id)
+        setPkg(complet)
       } else {
         // Hors-ligne : mise a jour optimiste locale, synchronisee au prochain sync.
         setPkg({ ...pkg, statutActuel: status })
@@ -65,7 +69,8 @@ export function ColisDetailPage() {
     try {
       const resultat = await retirerColisResilient(pkg.id, pkg.codeTracking, pkg.version)
       if (resultat.mode === 'server') {
-        setPkg(resultat.colis)
+        const complet = await obtenirColis(pkg.id)
+        setPkg(complet)
       } else {
         setPkg({ ...pkg, statutActuel: 'RETIRE' })
         alert('Hors-ligne : le retrait a été mis en file, il sera synchronisé automatiquement.')
@@ -144,7 +149,7 @@ export function ColisDetailPage() {
               </div>
 
               <ul className={styles.timeline}>
-                {pkg.historique.map((step, i) => (
+                {(pkg.historique ?? []).map((step, i) => (
                   <li key={step.id ?? i} className={styles.step}>
                     <div className={`${styles.dot} ${styles.dotDone}`}>
                       <i className="bi bi-check-lg" />

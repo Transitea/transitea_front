@@ -64,17 +64,25 @@ export function UpdateStatusSheet({
         )}
 
         <div className={styles.footer}>
-          <Button type="button" variant="ghost" onClick={onClose}>
-            Annuler
-          </Button>
-          <Button
-            type="button"
-            variant="primary"
-            disabled={!status}
-            onClick={() => status && onConfirm(status, comment)}
-          >
-            <i className="bi bi-check-lg" /> Valider
-          </Button>
+          {nextStatuses.length === 0 ? (
+            <Button type="button" variant="primary" onClick={onClose}>
+              Fermer
+            </Button>
+          ) : (
+            <>
+              <Button type="button" variant="ghost" onClick={onClose}>
+                Annuler
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                disabled={!status}
+                onClick={() => status && onConfirm(status, comment)}
+              >
+                <i className="bi bi-check-lg" /> Valider
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>
