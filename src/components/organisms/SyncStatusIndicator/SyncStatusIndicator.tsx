@@ -21,7 +21,7 @@ export function SyncStatusIndicator() {
   const enAttenteTotal = colisEnAttente + statutsEnAttente
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} role="region" aria-label="Statut de synchronisation">
       <Pill tone={enLigne ? 'success' : 'gold'} size="sm">
         <i className={`bi ${enLigne ? 'bi-wifi' : 'bi-wifi-off'}`} /> {enLigne ? 'En ligne' : 'Hors ligne'}
       </Pill>
@@ -37,6 +37,13 @@ export function SyncStatusIndicator() {
         className={styles.syncButton}
         onClick={synchroniserMaintenant}
         disabled={syncing || !enLigne}
+        aria-label={
+          syncing
+            ? 'Synchronisation en cours…'
+            : derniereSyncA
+              ? `Dernière synchro à ${formatHeure(derniereSyncA)} — cliquer pour resynchroniser`
+              : 'Synchroniser maintenant'
+        }
         title={
           syncing
             ? 'Synchronisation en cours…'

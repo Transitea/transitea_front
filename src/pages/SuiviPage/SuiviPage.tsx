@@ -38,10 +38,11 @@ export function SuiviPage() {
   }
 
   return (
-    <div className={styles.page}>
+    <main className={styles.page}>
       <div className={styles.brand}>
         Transi<span>tea</span>
       </div>
+      <h1 className="sr-only">Suivre un colis</h1>
 
       <div className={styles.card}>
         <form className={styles.search} onSubmit={handleSearch}>
@@ -134,6 +135,6 @@ export function SuiviPage() {
           Vous êtes une agence ? Connectez-vous
         </button>
       </div>
-    </div>
+    </main>
   )
 }

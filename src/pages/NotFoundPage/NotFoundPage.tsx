@@ -7,15 +7,15 @@ export function NotFoundPage() {
   const navigate = useNavigate()
 
   return (
-    <div className={styles.page}>
-      <div className={styles.code}>
+    <main className={styles.page}>
+      <div className={styles.code} aria-hidden="true">
         4<span>0</span>4
       </div>
-      <div className={styles.title}>Page introuvable</div>
-      <div className={styles.text}>La page que vous cherchez n'existe pas ou a été déplacée.</div>
+      <h1 className={styles.title}>Page introuvable</h1>
+      <p className={styles.text}>La page que vous cherchez n'existe pas ou a été déplacée.</p>
       <Button variant="primary" onClick={() => navigate(paths.dashboard)}>
         <i className="bi bi-house" /> Retour au tableau de bord
       </Button>
-    </div>
+    </main>
   )
 }
