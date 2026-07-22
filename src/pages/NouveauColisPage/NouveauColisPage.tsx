@@ -6,7 +6,8 @@ import { Card } from '@/components/molecules/Card'
 import { FormField } from '@/components/molecules/FormField'
 import { SelectField } from '@/components/molecules/SelectField'
 import { creerColisResilient } from '@/offline/offlineColisService'
-import { listerAgences, type AgenceReponse } from '@/services/agenceApi'
+import { listerAgencesResilient } from '@/offline/agenceCache'
+import type { AgenceReponse } from '@/services/agenceApi'
 import { useAuth } from '@/auth/AuthContext'
 import { paths } from '@/router/paths'
 import styles from './NouveauColisPage.module.css'
@@ -35,7 +36,7 @@ export function NouveauColisPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    listerAgences()
+    listerAgencesResilient()
       .then((list) => {
         setAgences(list)
         // Présélectionne l'agence de dépôt avec celle de l'utilisateur connecté.
@@ -43,7 +44,12 @@ export function NouveauColisPage() {
           setForm((prev) => ({ ...prev, agenceOrigineId: String(user.agenceId) }))
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        setError(
+          "Impossible de charger la liste des agences (ni en ligne, ni en cache local). "
+          + 'Connectez-vous au réseau au moins une fois avant de pouvoir créer des colis hors-ligne.',
+        )
+      })
   }, [user])
 
   const update = (field: keyof typeof initialState, value: string) =>
