@@ -1,4 +1,5 @@
 import { db } from './db'
+import { estErreurReseau } from './offlineColisService'
 import { listerAgences, type AgenceReponse } from '@/services/agenceApi'
 
 const CLE_CACHE_AGENCES = 'agencesCache'
@@ -9,6 +10,11 @@ const CLE_CACHE_AGENCES = 'agencesCache'
  * colis reste utilisable sans connexion (cf. CDC : enregistrement de colis
  * hors-ligne) — sans agences disponibles, le formulaire est inexploitable
  * meme si la mise en file du colis lui-meme fonctionne.
+ *
+ * Seules les vraies pannes reseau basculent sur le cache : une erreur metier
+ * (401, 500, etc.) remonte telle quelle pour ne pas afficher un message
+ * "hors-ligne" trompeur quand le vrai probleme est ailleurs (session
+ * expiree, erreur serveur...).
  */
 export async function listerAgencesResilient(): Promise<AgenceReponse[]> {
   try {
@@ -16,6 +22,8 @@ export async function listerAgencesResilient(): Promise<AgenceReponse[]> {
     await db.syncMeta.put({ cle: CLE_CACHE_AGENCES, valeur: JSON.stringify(agences) })
     return agences
   } catch (err) {
+    if (!estErreurReseau(err)) throw err
+
     const cache = await db.syncMeta.get(CLE_CACHE_AGENCES)
     if (cache) {
       return JSON.parse(cache.valeur) as AgenceReponse[]
