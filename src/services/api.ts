@@ -3,6 +3,33 @@ const BASE_URL = '/api'
 const ACCESS_KEY = 'transitea_access'
 const REFRESH_KEY = 'transitea_refresh'
 
+/**
+ * navigator.onLine n'est pas fiable sur toutes les configurations (peut
+ * rester à true en mode avion selon les adaptateurs réseau) : sans timeout,
+ * un appel vers un hôte injoignable peut rester en attente 30-60+ secondes
+ * avant que le navigateur n'abandonne, bloquant l'UI et retardant le repli
+ * hors-ligne. On borne donc explicitement chaque appel réseau.
+ *
+ * L'erreur de timeout est un TypeError, comme une vraie panne réseau, pour
+ * rester compatible avec estErreurReseau() sans changer les appelants.
+ */
+const TIMEOUT_MS = 8000
+
+async function fetchAvecTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
+  try {
+    return await fetch(url, { ...init, signal: controller.signal })
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new TypeError('Failed to fetch (timeout)', { cause: err })
+    }
+    throw err
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 export function getAccessToken(): string | null {
   return localStorage.getItem(ACCESS_KEY)
 }
@@ -21,7 +48,7 @@ async function refreshAccessToken(): Promise<string | null> {
   const refreshToken = localStorage.getItem(REFRESH_KEY)
   if (!refreshToken) return null
 
-  const res = await fetch(`${BASE_URL}/v1/auth/refresh`, {
+  const res = await fetchAvecTimeout(`${BASE_URL}/v1/auth/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken }),
@@ -39,7 +66,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   let token = getAccessToken()
 
   const doFetch = (t: string | null) =>
-    fetch(`${BASE_URL}${path}`, {
+    fetchAvecTimeout(`${BASE_URL}${path}`, {
       ...init,
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +102,7 @@ export async function apiFetchBlobUrl(path: string, init: RequestInit = {}): Pro
   let token = getAccessToken()
 
   const doFetch = (t: string | null) =>
-    fetch(`${BASE_URL}${path}`, {
+    fetchAvecTimeout(`${BASE_URL}${path}`, {
       ...init,
       headers: {
         ...(t ? { Authorization: `Bearer ${t}` } : {}),
