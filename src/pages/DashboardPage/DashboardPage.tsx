@@ -10,24 +10,9 @@ import { paths } from '@/router/paths'
 import { obtenirStatistiques, listerColis, type ColisReponse } from '@/services/colisApi'
 import { obtenirEnseigne, type EnseigneReponse } from '@/services/enseigneApi'
 import { useAuth } from '@/auth/AuthContext'
+import { useEnLigne } from '@/offline/useEnLigne'
 import type { StatCardProps } from '@/components/molecules/StatCard'
 import type { Package } from '@/data/dashboard'
-
-/** Statut de connectivité réel du navigateur (pas de synchronisation hors-ligne pour l'instant). */
-function useEnLigne(): boolean {
-  const [enLigne, setEnLigne] = useState(navigator.onLine)
-  useEffect(() => {
-    const onOnline = () => setEnLigne(true)
-    const onOffline = () => setEnLigne(false)
-    window.addEventListener('online', onOnline)
-    window.addEventListener('offline', onOffline)
-    return () => {
-      window.removeEventListener('online', onOnline)
-      window.removeEventListener('offline', onOffline)
-    }
-  }, [])
-  return enLigne
-}
 
 function formatDate(iso: string): string {
   const d = new Date(iso)

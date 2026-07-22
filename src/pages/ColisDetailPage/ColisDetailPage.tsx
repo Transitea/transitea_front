@@ -4,13 +4,8 @@ import { StatusBadge, type PackageStatus, STATUS_META } from '@/components/atoms
 import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
 import { UpdateStatusSheet } from '@/components/organisms/UpdateStatusSheet'
-import {
-  obtenirColis,
-  mettreAJourStatut,
-  retirerColis,
-  obtenirQrCodeUrl,
-  type ColisReponse,
-} from '@/services/colisApi'
+import { obtenirColis, obtenirQrCodeUrl, type ColisReponse } from '@/services/colisApi'
+import { mettreAJourStatutResilient, retirerColisResilient } from '@/offline/offlineColisService'
 import { paths } from '@/router/paths'
 import styles from './ColisDetailPage.module.css'
 
@@ -50,8 +45,14 @@ export function ColisDetailPage() {
   const handleUpdate = async (status: PackageStatus, comment: string) => {
     if (!pkg) return
     try {
-      const updated = await mettreAJourStatut(pkg.id, status, comment || undefined, comment || undefined)
-      setPkg(updated)
+      const resultat = await mettreAJourStatutResilient(pkg.id, pkg.version, status, comment || undefined)
+      if (resultat.mode === 'server') {
+        setPkg(resultat.colis)
+      } else {
+        // Hors-ligne : mise a jour optimiste locale, synchronisee au prochain sync.
+        setPkg({ ...pkg, statutActuel: status })
+        alert('Hors-ligne : la mise à jour a été mise en file, elle sera synchronisée automatiquement.')
+      }
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Erreur lors de la mise à jour')
     }
@@ -62,8 +63,13 @@ export function ColisDetailPage() {
     if (!pkg) return
     setRetraitLoading(true)
     try {
-      const updated = await retirerColis(pkg.codeTracking)
-      setPkg(updated)
+      const resultat = await retirerColisResilient(pkg.id, pkg.codeTracking, pkg.version)
+      if (resultat.mode === 'server') {
+        setPkg(resultat.colis)
+      } else {
+        setPkg({ ...pkg, statutActuel: 'RETIRE' })
+        alert('Hors-ligne : le retrait a été mis en file, il sera synchronisé automatiquement.')
+      }
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Erreur lors du retrait')
     } finally {
