@@ -12,7 +12,7 @@ export function Topbar({ title, subtitle, actions }: TopbarProps) {
   return (
     <header className={styles.topbar}>
       <div>
-        <div className={styles.title}>{title}</div>
+        <h1 className={styles.title}>{title}</h1>
         {subtitle && <div className={styles.sub}>{subtitle}</div>}
       </div>
       {actions && <div className={styles.right}>{actions}</div>}

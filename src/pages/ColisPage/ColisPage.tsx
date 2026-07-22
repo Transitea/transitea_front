@@ -208,6 +208,7 @@ export function ColisPage() {
           <div className={styles.search}>
             <Input
               icon="bi-search"
+              aria-label="Rechercher un colis par code, ville ou client"
               placeholder="Rechercher un code, une ville, un client…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

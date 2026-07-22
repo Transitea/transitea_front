@@ -31,6 +31,19 @@ body {
 /* Zone de contenu commune à toutes les pages applicatives */
 .app-content { padding: 24px 28px; flex: 1; }
 
+/* Contenu réservé aux lecteurs d'écran (RGAA) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (max-width: 900px) {
   .app-content { padding: 16px; }
 }

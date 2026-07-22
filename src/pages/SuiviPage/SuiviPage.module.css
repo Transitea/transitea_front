@@ -13,7 +13,7 @@
   font-weight: 800;
   color: var(--primary);
 }
-.brand span { color: var(--gold); }
+.brand span { color: #C2410C; }
 
 .card {
   width: 100%;

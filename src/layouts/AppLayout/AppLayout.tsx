@@ -84,9 +84,9 @@ export function AppLayout() {
         onClose={() => setDrawerOpen(false)}
       />
 
-      <div className={styles.main}>
+      <main className={styles.main}>
         <Outlet />
-      </div>
+      </main>
 
       <SyncStatusIndicator />
     </>
