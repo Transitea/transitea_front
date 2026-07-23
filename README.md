@@ -1,73 +1,92 @@
-# React + TypeScript + Vite
+# Transitea — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Application web (PWA) de suivi de colis, **offline-first**. React 19 / TypeScript / Vite.
 
-Currently, two official plugins are available:
+## Prérequis
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 22+
+- npm
 
-## React Compiler
+## Lancer en local (mode développement)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Installer les dépendances :
 
-## Expanding the ESLint configuration
+   ```bash
+   npm install
+   ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+2. S'assurer que le backend tourne sur `http://localhost:8080` (voir [../transitea_core/transitea/README.md](../transitea_core/transitea/README.md)).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+3. Lancer le serveur de développement :
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+   ```bash
+   npm run dev
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+   Application disponible sur http://localhost:5173 — le serveur Vite proxifie automatiquement les appels `/api` vers `http://localhost:8080` (voir `vite.config.ts`), aucune configuration supplémentaire n'est nécessaire.
+
+### Tester le scan QR depuis un smartphone (HTTPS requis)
+
+```bash
+npm run dev:phone
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Expose le serveur sur le réseau local en HTTPS (certificat auto-signé) : nécessaire car l'accès à la caméra (`getUserMedia`) exige un contexte sécurisé en dehors de `localhost`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Build de production
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
 ```
+
+Génère les fichiers statiques dans `dist/` (vérification TypeScript incluse via `tsc -b`).
+
+```bash
+npm run preview
+```
+
+Sert le build de `dist/` localement sur http://localhost:4173 pour vérifier le résultat avant déploiement.
+
+## Tests et lint
+
+```bash
+npm run test    # vitest
+npm run lint    # eslint
+```
+
+## Lancer en Docker
+
+```bash
+docker build -t transitea-front .
+docker run -p 8081:80 transitea-front
+```
+
+Construit l'application (Node 22) puis sert les fichiers statiques via nginx (`nginx:1.27-alpine`) sur http://localhost:8081.
+
+> ⚠️ La configuration nginx embarquée dans l'image (`default.conf`) proxifie `/api/` vers `api.transitea.fr`, le domaine du backend en **production** — elle ne fonctionne donc pas pour joindre un backend local. Pour tester le conteneur frontend contre un backend lancé en local (voir [../transitea_core/transitea/README.md](../transitea_core/transitea/README.md)), monter à la place `nginx.local.conf` (fourni dans ce dossier, cible le conteneur `transitea-back` par son nom) et rattacher le conteneur au même réseau Docker que le backend :
+>
+> ```bash
+> docker network create transitea-net   # une seule fois
+> docker run -d --name transitea-front --network transitea-net -p 8081:80 \
+>   -v "$(pwd)/nginx.local.conf:/etc/nginx/conf.d/default.conf:ro" \
+>   transitea-front
+> ```
+>
+> Voir [../LANCEMENT_LOCAL.txt](../LANCEMENT_LOCAL.txt) pour la procédure complète (BDD + backend + frontend sur le même réseau). Le nom de conteneur (et non `host.docker.internal`) est utilisé volontairement : `host.docker.internal` ne fonctionne que sur Docker Desktop (Windows/Mac) et pas sur un Docker natif (ex. WSL2 sans Docker Desktop).
+
+## Accès de test
+
+Une fois le frontend et le backend lancés (celui-ci avec le profil `SPRING_PROFILES_ACTIVE=dev`, voir [../transitea_core/transitea/README.md](../transitea_core/transitea/README.md)), se connecter sur la page de login avec l'un des comptes de démonstration :
+
+| Rôle | Email | Mot de passe |
+|---|---|---|
+| ADMIN | `admin@transitea.fr` | `admin123` |
+| OPERATEUR | `operateur@transitea.fr` | `operateur123` |
+| AGENT | `agent@transitea.fr` | `agent123` |
+
+## Structure du code
+
+- `src/pages`, `src/layouts`, `src/router` — pages et navigation
+- `src/services` — appels API (`api.ts` + un fichier par ressource : `colisApi.ts`, `authApi.ts`, ...)
+- `src/offline` — logique offline-first (Dexie / IndexedDB, synchronisation)
+- `src/auth` — authentification (JWT)
