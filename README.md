@@ -2,8 +2,6 @@
 
 Application web (PWA) de suivi de colis, **offline-first**. React 19 / TypeScript / Vite.
 
-> Pour lancer l'application complète (backend + frontend + BDD) en une seule commande, voir le [README à la racine du dépôt](../README.md).
-
 ## Prérequis
 
 - Node.js 22+
@@ -65,7 +63,21 @@ docker run -p 8081:80 transitea-front
 
 Construit l'application (Node 22) puis sert les fichiers statiques via nginx (`nginx:1.27-alpine`) sur http://localhost:8081.
 
-> ⚠️ La configuration nginx embarquée dans l'image (`default.conf`) proxifie `/api/` vers `api.transitea.fr`, le domaine du backend en **production**. Lancée seule avec cette commande, l'image ne pourra donc pas joindre un backend local. Pour un lancement 100 % local avec le backend aussi dockerisé, utiliser plutôt le `docker-compose.yml` à la racine du dépôt, qui monte une configuration nginx adaptée au réseau Docker local (voir [../README.md](../README.md)).
+> ⚠️ La configuration nginx embarquée dans l'image (`default.conf`) proxifie `/api/` vers `api.transitea.fr`, le domaine du backend en **production** — elle ne fonctionne donc pas pour joindre un backend local. Pour tester le conteneur frontend contre un backend lancé en local (voir [../transitea_core/transitea/README.md](../transitea_core/transitea/README.md)), monter à la place `nginx.local.conf` (fourni dans ce dossier, cible `host.docker.internal:8080`) :
+>
+> ```bash
+> docker run -p 8081:80 -v "$(pwd)/nginx.local.conf:/etc/nginx/conf.d/default.conf:ro" transitea-front
+> ```
+
+## Accès de test
+
+Une fois le frontend et le backend lancés (celui-ci avec le profil `SPRING_PROFILES_ACTIVE=dev`, voir [../transitea_core/transitea/README.md](../transitea_core/transitea/README.md)), se connecter sur la page de login avec l'un des comptes de démonstration :
+
+| Rôle | Email | Mot de passe |
+|---|---|---|
+| ADMIN | `admin@transitea.fr` | `admin123` |
+| OPERATEUR | `operateur@transitea.fr` | `operateur123` |
+| AGENT | `agent@transitea.fr` | `agent123` |
 
 ## Structure du code
 
