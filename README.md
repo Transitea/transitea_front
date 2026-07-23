@@ -63,11 +63,16 @@ docker run -p 8081:80 transitea-front
 
 Construit l'application (Node 22) puis sert les fichiers statiques via nginx (`nginx:1.27-alpine`) sur http://localhost:8081.
 
-> ⚠️ La configuration nginx embarquée dans l'image (`default.conf`) proxifie `/api/` vers `api.transitea.fr`, le domaine du backend en **production** — elle ne fonctionne donc pas pour joindre un backend local. Pour tester le conteneur frontend contre un backend lancé en local (voir [../transitea_core/transitea/README.md](../transitea_core/transitea/README.md)), monter à la place `nginx.local.conf` (fourni dans ce dossier, cible `host.docker.internal:8080`) :
+> ⚠️ La configuration nginx embarquée dans l'image (`default.conf`) proxifie `/api/` vers `api.transitea.fr`, le domaine du backend en **production** — elle ne fonctionne donc pas pour joindre un backend local. Pour tester le conteneur frontend contre un backend lancé en local (voir [../transitea_core/transitea/README.md](../transitea_core/transitea/README.md)), monter à la place `nginx.local.conf` (fourni dans ce dossier, cible le conteneur `transitea-back` par son nom) et rattacher le conteneur au même réseau Docker que le backend :
 >
 > ```bash
-> docker run -p 8081:80 -v "$(pwd)/nginx.local.conf:/etc/nginx/conf.d/default.conf:ro" transitea-front
+> docker network create transitea-net   # une seule fois
+> docker run -d --name transitea-front --network transitea-net -p 8081:80 \
+>   -v "$(pwd)/nginx.local.conf:/etc/nginx/conf.d/default.conf:ro" \
+>   transitea-front
 > ```
+>
+> Voir [../LANCEMENT_LOCAL.txt](../LANCEMENT_LOCAL.txt) pour la procédure complète (BDD + backend + frontend sur le même réseau). Le nom de conteneur (et non `host.docker.internal`) est utilisé volontairement : `host.docker.internal` ne fonctionne que sur Docker Desktop (Windows/Mac) et pas sur un Docker natif (ex. WSL2 sans Docker Desktop).
 
 ## Accès de test
 
