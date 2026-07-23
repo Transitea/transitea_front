@@ -7,19 +7,13 @@ import { Topbar } from '@/components/organisms/Topbar'
 import { Card } from '@/components/molecules/Card'
 import { rechercherColis, retirerColis, type ColisReponse } from '@/services/colisApi'
 import { paths } from '@/router/paths'
+import { extractCode } from './extractCode'
 import styles from './ScanPage.module.css'
 
 // La librairie de scan (lourde) n'est chargée qu'à l'ouverture de la caméra.
 const QrScanner = lazy(() =>
   import('@/components/organisms/QrScanner').then((m) => ({ default: m.QrScanner })),
 )
-
-/** Extrait un code de tracking d'un texte de QR (code brut ou URL le contenant). */
-function extractCode(text: string): string {
-  // Format réel (GenerateurCodeTracking) : TRA-{année}-{6 caractères A-Z0-9}, pas seulement des chiffres.
-  const match = text.match(/TRA-\d{4}-[A-Z0-9]{6}/i)
-  return (match ? match[0] : text).trim().toUpperCase()
-}
 
 export function ScanPage() {
   const navigate = useNavigate()
