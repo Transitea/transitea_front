@@ -13,6 +13,9 @@ RUN npm run build
 FROM nginx:1.27-alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
-COPY default.conf /etc/nginx/conf.d/default.conf
+COPY default.conf.template /etc/nginx/templates/default.conf.template
+
+# Valeur par defaut si API_BACKEND_URL n'est pas fournie au conteneur (prod)
+ENV API_BACKEND_URL=http://api.transitea.fr
 
 EXPOSE 80
