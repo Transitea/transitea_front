@@ -39,7 +39,7 @@ describe('UpdateStatusSheet', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it.each<PackageStatus>(['ENREGISTRE', 'EN_TRANSIT', 'ARRIVE_AGENCE', 'REFUSE'])(
+  it.each<PackageStatus>(['ENREGISTRE', 'EN_TRANSIT', 'EN_COURS_DE_LIVRAISON', 'ARRIVE_AGENCE', 'REFUSE'])(
     'shows a "Valider" button (enabled by default) for the non-terminal status %s',
     (status) => {
       setup(status)
