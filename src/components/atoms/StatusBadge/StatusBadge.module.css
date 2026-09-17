@@ -17,9 +17,10 @@
   background: currentColor;
 }
 
-/* Les 6 statuts du cahier des charges (modèle dépôt/retrait), couleurs distinctes */
+/* Les 7 statuts du cahier des charges (modèle dépôt/retrait), couleurs distinctes */
 .enregistre { background: #f1f5f9; color: #475569; }
 .enTransit { background: #e0f2fe; color: #0369a1; }
+.enCoursLivraison { background: #fef3c7; color: #b45309; }
 .arriveAgence { background: #ede9fe; color: #6d28d9; }
 .retire { background: var(--success-bg); color: var(--success); }
 .refuse { background: var(--danger-bg); color: var(--danger); }

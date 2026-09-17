@@ -7,6 +7,7 @@ import styles from './StatusBadge.module.css'
 export type PackageStatus =
   | 'ENREGISTRE'
   | 'EN_TRANSIT'
+  | 'EN_COURS_DE_LIVRAISON'
   | 'ARRIVE_AGENCE'
   | 'RETIRE'
   | 'REFUSE'
@@ -24,6 +25,7 @@ interface StatusMeta {
 export const STATUS_META: Record<PackageStatus, StatusMeta> = {
   ENREGISTRE: { label: 'Enregistré', className: styles.enregistre, notifies: true },
   EN_TRANSIT: { label: 'En transit', className: styles.enTransit, notifies: false },
+  EN_COURS_DE_LIVRAISON: { label: 'En cours de livraison', className: styles.enCoursLivraison, notifies: true },
   ARRIVE_AGENCE: { label: 'Arrivé à l’agence', className: styles.arriveAgence, notifies: true },
   RETIRE: { label: 'Retiré', className: styles.retire, notifies: true },
   REFUSE: { label: 'Refusé', className: styles.refuse, notifies: true },
@@ -34,6 +36,7 @@ export const STATUS_META: Record<PackageStatus, StatusMeta> = {
 export const STATUS_ORDER: PackageStatus[] = [
   'ENREGISTRE',
   'EN_TRANSIT',
+  'EN_COURS_DE_LIVRAISON',
   'ARRIVE_AGENCE',
   'RETIRE',
   'REFUSE',
@@ -42,11 +45,14 @@ export const STATUS_ORDER: PackageStatus[] = [
 
 /**
  * Transitions autorisées, miroir de ValidateurTransitionStatut côté backend.
- * RETIRE et RETOUR_EXPEDITEUR sont des statuts terminaux.
+ * Depuis ENREGISTRE, le colis part soit en transit inter-agences, soit
+ * directement en livraison (pas de transit nécessaire). RETIRE et
+ * RETOUR_EXPEDITEUR sont des statuts terminaux.
  */
 export const STATUS_TRANSITIONS: Record<PackageStatus, PackageStatus[]> = {
-  ENREGISTRE: ['EN_TRANSIT', 'REFUSE'],
+  ENREGISTRE: ['EN_TRANSIT', 'EN_COURS_DE_LIVRAISON', 'REFUSE'],
   EN_TRANSIT: ['ARRIVE_AGENCE'],
+  EN_COURS_DE_LIVRAISON: ['RETIRE', 'REFUSE'],
   ARRIVE_AGENCE: ['RETIRE', 'REFUSE'],
   REFUSE: ['RETOUR_EXPEDITEUR'],
   RETIRE: [],
